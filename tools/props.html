@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>argmin 3D props (build tool)</title>
+<!-- Renders the site's 3D accents to transparent PNGs; tools/props.py drives it and saves the files.
+     Flat-shaded solids in the page's palette with navy outlines, true isometric camera, so the
+     pictures sit with the drawings. Everything is drawn at one scale (PX pixels per unit), so the
+     truck and the buildings match when the page shows them at the same size. -->
+<body style="margin:0;background:#888">
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
+
+const C = { paper: 0xf6f7f4, light: 0xa6d2f3, light2: 0xc6e2f7, mid: 0x79acd9, navy: 0x1c2d4f, ink: 0x111311, white: 0xffffff, road: 0x2f7fd6 };
+
+function solid(geo, color, edge = C.navy) {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color, flatShading: true })));
+  g.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 20), new THREE.LineBasicMaterial({ color: edge })));
+  return g;
+}
+const box = (w, h, d, color, edge) => solid(new THREE.BoxGeometry(w, h, d), color, edge);
+const at = (o, x, y, z) => { o.position.set(x, y, z); return o; };
+
+function carton(s, color) {
+  const g = box(s, s * 0.78, s * 0.92, color);
+  g.add(box(s * 0.16, s * 0.79, s * 0.93, C.white));
+  return g;
+}
+
+// the truck: forward is +x, its ground centre at the origin
+function truck() {
+  const g = new THREE.Group();
+  g.add(at(box(3.2, 1.7, 1.6, C.white), -0.75, 1.25, 0));
+  g.add(at(box(3.22, 0.22, 1.62, C.light), -0.75, 0.75, 0));
+  g.add(at(box(1.3, 1.35, 1.55, C.navy, C.ink), 1.5, 1.05, 0));
+  g.add(at(box(0.05, 0.55, 1.2, C.light, C.ink), 2.17, 1.35, 0));
+  g.add(at(box(4.6, 0.25, 1.4, C.ink, C.ink), -0.05, 0.42, 0));
+  const wheel = new THREE.CylinderGeometry(0.36, 0.36, 0.3, 18);
+  for (const [x, z] of [[-1.65, 0.72], [-1.65, -0.72], [-0.65, 0.72], [-0.65, -0.72], [1.55, 0.72], [1.55, -0.72]]) {
+    const w = solid(wheel, C.ink, C.ink); w.rotation.x = Math.PI / 2; g.add(at(w, x, 0.36, z));
+  }
+  return g;
+}
+
+// a galpón: the arched-roof warehouse of every Chilean industrial park, with its roll-up door
+function bodega() {
+  const g = new THREE.Group();
+  g.add(at(box(5.2, 2.0, 3.6, C.white), 0, 1.0, 0));
+  // the arched roof: half a cylinder (theta 0..pi is the upper half once its axis lies along x), flattened
+  const arch = solid(new THREE.CylinderGeometry(1.86, 1.86, 5.24, 28, 1, false, 0, Math.PI), C.light);
+  arch.rotation.z = Math.PI / 2;
+  const roof = new THREE.Group(); roof.add(arch); roof.position.set(0, 2.0, 0); roof.scale.set(1, 0.62, 1);
+  g.add(roof);
+  g.add(at(box(0.06, 1.55, 1.7, C.navy, C.ink), 2.62, 0.78, 0.5));            // the roll-up door
+  for (let i = 0; i < 6; i++) g.add(at(box(0.07, 0.04, 1.62, C.mid, C.navy), 2.64, 0.2 + i * 0.25, 0.5));
+  g.add(at(box(0.06, 0.6, 0.5, C.light2), 2.62, 1.1, -1.2));                  // a window
+  g.add(at(box(8.6, 0.08, 5.6, C.light2, C.mid), 1.5, 0.0, 0));                // the yard, with room to park at the door
+  const stack = new THREE.Group();
+  [[0, 0, 0], [0.62, 0, 0], [0.31, 0.5, 0]].forEach(([x, y, z], i) => stack.add(at(carton(0.6, [C.light, C.white, C.light2][i]), x, y + 0.24, z)));
+  g.add(at(stack, 3.4, 0, -1.9));
+  return g;
+}
+
+// the destination: a small two-storey office with a door and an awning
+function office() {
+  const g = new THREE.Group();
+  g.add(at(box(3.4, 3.0, 2.8, C.white), 0, 1.5, 0));
+  g.add(at(box(3.5, 0.18, 2.9, C.navy, C.ink), 0, 3.06, 0));
+  for (const y of [0.95, 2.15]) for (const z of [-0.8, 0, 0.8]) g.add(at(box(0.06, 0.6, 0.48, C.light), 1.72, y, z));
+  g.add(at(box(0.06, 1.2, 0.7, C.navy, C.ink), 1.72, 0.6, 0));
+  g.add(at(box(0.7, 0.06, 1.3, C.light, C.navy), 2.05, 1.35, 0));            // the awning
+  g.add(at(box(7.0, 0.08, 4.6, C.light2, C.mid), 1.5, 0.0, 0));
+  return g;
+}
+
+const PX = 450 / 7;    // pixels per world unit: the truck's frame is 540 x 450 for 8.4 x 7 units
+const camera = () => { const c = new THREE.OrthographicCamera(-1, 1, 1, -1, -100, 100); c.position.set(6, 6, 6); c.lookAt(0, 0, 0); c.updateMatrixWorld(); return c; };
+// frame [x0, x1, y0, y1] in view units: the truck's is fixed around its ground point; a building's fits its bounds
+function fit(obj, pad = 0.12) {
+  const cam = camera(), b = new THREE.Box3().setFromObject(obj), f = [Infinity, -Infinity, Infinity, -Infinity];
+  for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) {
+    const v = new THREE.Vector3(x, y, z).applyMatrix4(cam.matrixWorldInverse);
+    f[0] = Math.min(f[0], v.x); f[1] = Math.max(f[1], v.x); f[2] = Math.min(f[2], v.y); f[3] = Math.max(f[3], v.y);
+  }
+  return [f[0] - pad, f[1] + pad, f[2] - pad, f[3] + pad];
+}
+// where a world point lands in the picture, as fractions of its width and height
+function spot(frame, p) {
+  const v = new THREE.Vector3(...p).applyMatrix4(camera().matrixWorldInverse);
+  return [+((v.x - frame[0]) / (frame[1] - frame[0])).toFixed(4), +((frame[3] - v.y) / (frame[3] - frame[2])).toFixed(4)];
+}
+function render(obj, frame) {
+  const w = Math.round((frame[1] - frame[0]) * PX), h = Math.round((frame[3] - frame[2]) * PX);
+  const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+  const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, preserveDrawingBuffer: true });
+  r.setPixelRatio(1); r.setSize(w, h, false); r.setClearColor(0x000000, 0);
+  const sc = new THREE.Scene();
+  sc.add(new THREE.HemisphereLight(0xffffff, 0x8fb6d8, 1.7));
+  const sun = new THREE.DirectionalLight(0xffffff, 1.3); sun.position.set(5, 9, 3); sc.add(sun);
+  sc.add(obj);
+  const cam = camera();                                        // true isometric
+  [cam.left, cam.right, cam.bottom, cam.top] = frame; cam.updateProjectionMatrix();
+  r.render(sc, cam);
+  const url = canvas.toDataURL('image/png');
+  r.dispose();
+  return url;
+}
+
+const out = { truck: [], spots: {} };
+const TRUCK = [-4.2, 4.2, -3.5, 3.5];                         // the ground point under the truck is the frame's centre
+for (let k = 0; k < 16; k++) { const t = truck(); t.rotation.y = k * Math.PI / 8; out.truck.push(render(t, TRUCK)); }
+const B = bodega(), fb = fit(B);
+out.bodega = render(B, fb);
+out.spots.bodega = { door: spot(fb, [2.62, 0, 0.5]), park: spot(fb, [4.5, 0, 0.5]) };    // the roll-up door, and the truck's ground point backed up to it
+const O = office(), fo = fit(O);
+out.office = render(O, fo);
+out.spots.office = { door: spot(fo, [1.72, 0, 0]), park: spot(fo, [3.7, 0, 0.6]) };
+window.PROPS = out;
+document.title = 'ready';
+</script>
+</body>
+</html>

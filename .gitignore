@@ -1,0 +1,8 @@
+# research, screenshots, originals of the found photos, tool state
+draft/
+.taste-skill/
+# the founders' CVs: private, never published
+extras/
+node_modules/
+.DS_Store
+Thumbs.db

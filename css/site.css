@@ -1,0 +1,553 @@
+/* argmin, loud and flat, with a road through it. Flat fields edge to edge, one heavy condensed face for
+   display (always one ink, never an accented word), Sofia Sans for text, square corners, no rules, no
+   shadows, no gradients. A road runs down the page, mostly in a lane kept free on the right, and a
+   truck drives it with the scroll (js/story.js); drawings made from photographs draw themselves as they
+   arrive (js/draw.js). Layers: fields, then pictures (z 0), then the road and truck (z 1), then words
+   (z 2), so the road passes under every line of text and over every picture. Sections never make a
+   stacking context of their own. The palette is a handful of roles below; a palette is one block. */
+
+/* ---------- fonts (self-hosted, OFL) ---------- */
+@font-face { font-family: "Sofia Sans"; font-style: normal; font-weight: 400 600; font-display: swap;
+  src: url(/assets/fonts/sofia-sans-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Sofia Sans"; font-style: normal; font-weight: 400 600; font-display: swap;
+  src: url(/assets/fonts/sofia-sans-latin-ext.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Sofia Sans Extra Condensed"; font-style: normal; font-weight: 900; font-display: swap;
+  src: url(/assets/fonts/sofia-sans-extra-condensed-latin.woff2) format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Sofia Sans Extra Condensed"; font-style: normal; font-weight: 900; font-display: swap;
+  src: url(/assets/fonts/sofia-sans-extra-condensed-latin-ext.woff2) format("woff2");
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+/* ---------- palette: roles ---------- */
+:root {
+  --paper: #f6f7f4;       /* neutral, a hair cool: never cream */
+  --paper-2: #e9ebe6;     /* one tone step on paper */
+  --ink: #111311;
+  --ink-2: #3a3f3a;       /* secondary notes only */
+  --ink-strip: #2a2f2a;
+
+  /* celeste y overol: light blue fields, workwear navy as the second field and the road */
+  --a: #a6d2f3;           /* the light field: calculator, questions, the first price */
+  --a-2: #8cc3ec;         /* its darker strip */
+  --a-ink: var(--ink);    /* text on it */
+  --b: #1f3150;           /* the second field: contact, the menu, the middle price; and the road */
+  --b-2: #16243d;
+  --b-ink: var(--paper);
+  --run-1: #16243d; --run-2: #1f3150; --run-3: #3a5580; --run-4: #a3b4cf; --run-5: #d0d9e7;   /* how we work, dark to light */
+  --route-2: #2f7fd6;     /* the second truck on the map: a mid blue, 3.9:1 on paper, apart from the navy */
+  --run-ink-dark: var(--paper); --run-ink-light: var(--ink);
+
+  --display: "Sofia Sans Extra Condensed", "Arial Narrow", sans-serif;
+  --text: "Sofia Sans", system-ui, sans-serif;
+  /* seven sizes, far apart */
+  --t-giant: clamp(64px, 15vw, 240px);
+  --t-mega: clamp(64px, 10.4vw, 168px);
+  --t-head: clamp(44px, 5.6vw, 92px);
+  --t-state: clamp(24px, 2.4vw, 36px);
+  --t-lead: clamp(19px, 1.45vw, 22px);
+  --t-body: clamp(17px, 1.1vw, 19px);
+  --t-small: 15px;
+
+  --m: 28px;                              /* the one pair of outer margins */
+  --lane: clamp(104px, 9vw, 148px);       /* kept free on the right for the road */
+  --sec: clamp(104px, 11.5vw, 184px);     /* padding inside a field */
+  --k: .46;                               /* the truck's sprite scale (frames of 540 x 450) */
+  --kp: .56;                              /* the buildings', drawn at the truck's scale */
+  --ease: cubic-bezier(.22, 1, .36, 1);
+}
+@media (max-width: 1199px) { :root { --k: .4; --kp: .5; } }
+@media (max-width: 899px) { :root { --m: 20px; --lane: 26px; --k: .24; --kp: .5; } }
+@media (max-width: 599px) { :root { --m: 16px; --k: .22; --kp: .46; } }
+
+/* ---------- base ---------- */
+html { color-scheme: light; background: var(--paper); color: var(--ink); overflow-x: clip; -webkit-text-size-adjust: 100%; text-size-adjust: 100%;
+       scroll-behavior: smooth; scroll-padding-top: 84px; scrollbar-gutter: stable; scrollbar-color: var(--ink) var(--paper-2); }
+body { margin: 0; font: 400 var(--t-body)/1.55 var(--text); overflow-x: clip; -webkit-font-smoothing: antialiased; }
+::selection { background: var(--ink); color: var(--a); }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration-thickness: 2px; text-underline-offset: .2em; transition: text-underline-offset .16s var(--ease), color .16s var(--ease); }
+a:hover { text-underline-offset: .32em; }
+a, button, input, textarea { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+figure { margin: 0; }
+@media (pointer: fine) { html { overscroll-behavior: none; } }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.skip { position: absolute; left: var(--m); top: -80px; z-index: 100; background: var(--ink); color: var(--paper); padding: 12px 16px; font-weight: 600; text-decoration: none; }
+.skip:focus { top: 12px; }
+
+/* ---------- type ---------- */
+.mega, .head { margin: 0; font-family: var(--display); font-weight: 900; text-transform: uppercase; letter-spacing: .004em;
+               overflow-wrap: break-word; min-width: 0; text-wrap: balance; font-variant-numeric: lining-nums; }
+.mega { font-size: var(--t-mega); line-height: .94; }
+.head { font-size: var(--t-head); line-height: .96; }
+/* each authored line sits in its own mask; the padding keeps accents and commas inside it */
+.ln { display: block; overflow: hidden; padding: .16em 0 .08em; margin: -.16em 0 -.08em; }
+.ln > span { display: inline-block; }
+.state { margin: 0; font-size: var(--t-state); line-height: 1.2; font-weight: 500; text-wrap: pretty; font-variant-numeric: tabular-nums; }
+.body { margin: 0; font-size: var(--t-body); line-height: 1.55; max-width: 58ch; text-wrap: pretty; }
+.small { margin: 0; font-size: var(--t-small); line-height: 1.45; text-wrap: pretty; max-width: 56ch; }
+.link { font-weight: 600; }
+p, li, figcaption { text-wrap: pretty; }
+
+/* ---------- controls ---------- */
+.btn { display: inline-flex; align-items: center; height: 48px; padding: 0 20px; background: var(--ink); color: var(--paper);
+       font: 600 var(--t-small)/1 var(--text); text-decoration: none; white-space: nowrap; transition: background-color .16s var(--ease), transform .16s var(--ease); }
+.btn:hover { background: var(--b-2); }
+.btn:active { transform: translateY(1px); }
+.btn-light { background: var(--a); color: var(--a-ink); }
+.btn-light:hover { background: var(--paper); }
+.textbtn { justify-self: start; padding: 0; border: 0; background: none; color: inherit; cursor: pointer; font: 600 var(--t-body)/1.4 var(--text);
+           text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; transition: text-underline-offset .16s var(--ease); }
+.textbtn:hover { text-underline-offset: .32em; }
+.textbtn:active { transform: translateY(1px); }
+
+/* ---------- the bar: the wordmark and the menu, always there ---------- */
+.top { position: fixed; inset: 0 0 auto; z-index: 50; display: flex; align-items: center; gap: 24px; padding: 12px var(--m);
+       transition: background-color .2s linear; }
+.top.solid { background: var(--paper); }
+.wm { display: block; margin-right: auto; color: var(--ink); text-decoration: none; transition: color .2s linear; }
+.wm-svg { display: block; height: 46px; width: auto; }
+.top-alt:not(.btn) { font-size: var(--t-small); font-weight: 500; text-decoration: none; }
+.top-alt:not(.btn):hover { text-decoration: underline; }
+.js .top-alt, html:not(.js) .burger { display: none; }   /* without script: the language and the call instead of the menu */
+.burger { position: relative; width: 48px; height: 48px; margin-right: -12px; padding: 0; border: 0; background: none; color: var(--ink); cursor: pointer;
+          transition: color .2s linear; }
+.burger:hover { color: var(--b); }
+.burger i { position: absolute; left: 8px; width: 28px; height: 3px; background: currentColor; transition: transform .3s var(--ease), opacity .2s linear; }
+.burger i:nth-child(1) { top: 15px; }
+.burger i:nth-child(2) { top: 22.5px; }
+.burger i:nth-child(3) { top: 30px; }
+.burger[aria-expanded="true"] i:nth-child(1) { transform: translateY(7.5px) rotate(45deg); }
+.burger[aria-expanded="true"] i:nth-child(2) { opacity: 0; }
+.burger[aria-expanded="true"] i:nth-child(3) { transform: translateY(-7.5px) rotate(-45deg); }
+
+/* the menu: a navy field over the page, the sections in display type */
+.menu { position: fixed; inset: 0; z-index: 45; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; box-sizing: border-box;
+        padding: 104px var(--m) 32px; overflow-y: auto; overscroll-behavior: contain; background: var(--b); color: var(--b-ink);
+        transform: translateY(-100%); transition: transform .45s var(--ease); }
+.menu[hidden] { display: none; }
+.menu.open { transform: none; }
+.menu :focus-visible { outline-color: var(--a); }
+.menu-list { list-style: none; margin: 0; padding: 0; }
+.menu-list a { display: inline-block; padding: 4px 0; font-family: var(--display); font-weight: 900; font-size: var(--t-head); line-height: .98;
+               text-transform: uppercase; text-decoration: none; }
+.menu-list a:hover { color: var(--a); }
+.menu-list li { transform: translateY(24px); opacity: 0; }
+.menu.open .menu-list li { transform: none; opacity: 1; transition: transform .5s var(--ease), opacity .3s linear; }
+.menu.open .menu-list li:nth-child(2) { transition-delay: .04s; }
+.menu.open .menu-list li:nth-child(3) { transition-delay: .08s; }
+.menu.open .menu-list li:nth-child(4) { transition-delay: .12s; }
+.menu.open .menu-list li:nth-child(5) { transition-delay: .16s; }
+.menu-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; font-size: var(--t-lead); font-weight: 600; }
+.menu-foot a:not(.btn) { text-decoration: none; }
+.menu-foot a:not(.btn):hover { text-decoration: underline; }
+html.menu-open { overflow: hidden; }
+.menu-open .top { background: transparent; }
+.menu-open .wm, .menu-open .burger { color: var(--paper); }
+.menu-open .burger:hover { color: var(--a); }
+.menu-open .top :focus-visible { outline-color: var(--a); }
+
+/* ---------- layers: pictures under the road, words over it ---------- */
+main > section { position: relative; }
+:where(main > section > *) { position: relative; z-index: 2; }
+.draw { position: relative; z-index: 0; }
+.prop { position: relative; z-index: auto; }
+.prop > img { position: relative; z-index: 0; display: block; width: 100%; height: auto; }
+
+/* the road's marks: a way is a point, a pin a dot with a caption (the dot under the truck, the caption over it) */
+.way, .pin { position: absolute; z-index: auto; width: 0; height: 0; }
+.pin::before { content: ""; position: absolute; z-index: 0; left: -11px; top: -11px; width: 22px; height: 22px; box-sizing: border-box;
+                border: 6px solid var(--b); border-radius: 50%; background: var(--a); }
+.pin-cap { position: absolute; z-index: 2; width: max-content; max-width: 14em; padding: 4px 8px; background: var(--paper); color: var(--ink);
+            font: 600 var(--t-small)/1.3 var(--text); }
+.cap-up .pin-cap { left: -16px; bottom: 22px; }
+.cap-left .pin-cap { right: 24px; top: 0; transform: translateY(-50%); }
+.cap-right .pin-cap { left: 24px; top: 0; transform: translateY(-50%); }
+.cap-lane .pin-cap { left: 0; top: 22px; transform: translateX(-50%); max-width: calc(var(--lane) + 24px); text-align: center; }
+html:not(.js) .pin { display: none; }
+
+/* the road and the truck (js/story.js sizes the layer to the page and draws them) */
+.story { position: absolute; left: 0; top: 0; z-index: 1; width: 100%; height: 0; pointer-events: none; }
+html:not(.js) .story { display: none; }
+.story-svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.story path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.road-rim { stroke: var(--paper); stroke-width: 10; stroke-dasharray: 0 16; }
+.road-plan { stroke: var(--b); stroke-width: 5; stroke-dasharray: 0 16; }
+.road-case { stroke: var(--paper); stroke-width: 13; }
+.road-done { stroke: var(--b); stroke-width: 6; }
+.truck { position: absolute; left: 0; top: 0; width: calc(540px * var(--k)); height: calc(450px * var(--k)); visibility: hidden;
+         background: url(/assets/3d/truck.webp) 0 0 / 1600% 100% no-repeat; will-change: transform; }
+.story.ready .truck { visibility: visible; }
+
+/* drawings: the <img> is the finished drawing; with script it is swapped for the inline SVG and drawn */
+.draw > img, .draw > svg { display: block; width: 100%; height: auto; }
+.js .draw:not(.inline):not(.flat) > img { visibility: hidden; }
+.draw .ink { stroke-dasharray: 1 2; }
+.draw .tone { opacity: var(--tone, 1); }
+
+/* ---------- 1. hero: the day starts ---------- */
+.hero { --h1: clamp(56px, 9.4vw, 150px); display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 100svh; box-sizing: border-box;
+        padding: clamp(104px, 15svh, 152px) var(--m) 0; background: var(--paper); overflow: hidden; }
+.hero-copy { display: grid; justify-items: start; gap: 28px; }
+.hero .mega { font-size: var(--h1); }
+.hero-sub { width: min(29em, 100%); margin: 0; font-size: var(--t-lead); line-height: 1.4; font-weight: 500; }
+.hero-ground { margin: 36px calc(-1 * var(--m)) 0; min-height: 200px; opacity: .5; contain: size; }
+.hero-ground > img, .hero-ground > svg { height: 100%; object-fit: cover; object-position: 50% 0; }
+.s-salida { left: 76%; top: 24%; }
+.s-salida .pin-cap { right: auto; left: -64px; top: 58px; transform: none; }   /* under the truck, which waits here */
+.w-h1 { left: 88%; top: 19%; }
+.s-pedido1 { left: 93%; top: 45%; }
+.w-h2 { left: 80%; top: 78%; }
+
+/* ---------- 2. the calculator, and the warehouse it is about ---------- */
+.calc { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 44px 24px; align-items: start;
+        padding: calc(var(--sec) * .55) calc(var(--m) + var(--lane)) var(--sec) var(--m); background: var(--a); color: var(--a-ink); }
+.w-c1 { left: calc(100% - var(--m) - var(--lane) / 2); top: 0; }
+.w-c3 { left: calc(100% - var(--m) - var(--lane) / 2); top: 100%; }
+.calc-head { grid-column: 1 / 8; grid-row: 1; }
+/* the hint: a note and a short hooked arrow into a number box (both placed by js/calc.js); gone once used */
+.calc-hint { position: absolute; left: 0; top: 0; margin: 0; font: 600 var(--t-body)/1.1 var(--text); white-space: nowrap;
+             transform: rotate(-7deg); transform-origin: 0 100%; }   /* a small note in the margin, slanted; js/calc.js sets it by the box */
+.calc-arrow { position: absolute; left: 0; top: 0; z-index: 1; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.calc-arrow path { fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+html:not(.js) .calc-hint, html:not(.js) .calc-arrow { display: none; }
+.js .calc:not(.hinted) .calc-hint { opacity: 0; transform: translateY(6px) rotate(-7deg); }
+.js .calc:not(.hinted) .calc-arrow-head { opacity: 0; }
+.calc.hinted .calc-hint { transition: opacity .45s var(--ease) .7s, transform .45s var(--ease) .7s; }
+.calc.hinted .calc-arrow-head { transition: opacity .2s linear .85s; }
+.calc.used .calc-hint, .calc.used .calc-arrow { opacity: 0; transition: opacity .4s var(--ease); }
+.draw-calc { grid-column: 8 / 13; grid-row: 1 / 3; margin-right: calc(-1 * (var(--m) + var(--lane))); background: var(--paper); }
+.draw-calc .ink { stroke-width: 3.2; }
+.calc-form { grid-column: 1 / 8; grid-row: 2; margin: 0; }
+.calc-form p { margin: 0; max-width: 34em; }
+.field { white-space: nowrap; }
+.unit { font-weight: 600; }
+.calc input { font: inherit; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--a); caret-color: var(--a);
+              background: var(--ink); border: 0; border-radius: 0; margin: 0; padding: .02em .22em; min-width: 2ch; field-sizing: content; }
+.calc input:hover { background: var(--b-2); }
+.calc input:focus-visible { outline: 3px solid var(--b); outline-offset: 2px; }
+.calc input[aria-invalid="true"] { background: var(--paper); color: var(--ink); caret-color: var(--ink); outline: 3px solid var(--ink); outline-offset: 2px; }
+.calc-result { grid-column: 1 / -1; grid-row: 3; }
+.calc-fig { margin: 0; font-family: var(--display); font-weight: 900; font-size: var(--t-giant); line-height: .86; letter-spacing: .004em;
+            font-variant-numeric: tabular-nums lining-nums; white-space: nowrap; }
+.calc-says { margin-top: 16px; max-width: 34em; }
+.calc-says output { font-weight: 600; font-variant-numeric: tabular-nums; }
+.prop-bodega { grid-column: 9 / 13; grid-row: 4; justify-self: end; width: calc(661px * var(--kp)); margin: -24px 0 calc(var(--sec) * -.35); }
+.prop-bodega .w-c2 { left: 104%; top: 58%; }
+.s-bodega { left: 67.19%; top: 81.23%; }
+.s-bodega .pin-cap { right: auto; left: calc(-661px * var(--kp) * .3); top: calc(556px * var(--kp) * .2 + 8px); transform: none; }   /* under the yard, clear of the truck at the door */
+.calc-foot { grid-column: 1 / 9; grid-row: 4; align-self: end; display: flex; align-items: baseline; gap: 16px 40px; flex-wrap: wrap; }
+.calc-foot .body { max-width: 52ch; }
+
+/* ---------- 3. what we optimize: a street, the list, then the road north ---------- */
+.models { padding: var(--sec) calc(var(--m) + var(--lane)) 0 var(--m); background: var(--paper); }
+.w-m1 { left: calc(100% - var(--m) - var(--lane) / 2); top: 0; }
+.models-top, .model-list li, .routes-top, .how-top, .routes-foot { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; }
+.models-top { z-index: auto; align-items: center; margin-bottom: 56px; }
+.models-lead { grid-column: 1 / 7; display: grid; gap: 32px; position: relative; z-index: 2; }
+.models-pic { grid-column: 7 / 13; position: relative; margin-right: calc(-1 * (var(--m) + var(--lane))); }
+.draw-models .ink { stroke-width: 3; }
+.w-mp { left: calc(100% - var(--m) - var(--lane) / 2); top: 3%; }
+.s-pedido2 { left: 50%; top: 88%; }
+.w-m2 { left: calc(100% - var(--m) - var(--lane) / 2); top: 100%; }
+.model-list { position: static; list-style: none; margin: 0 calc(-1 * (var(--m) + var(--lane))) 0 calc(-1 * var(--m)); padding: 0; }
+.model-list li { align-items: baseline; padding: 32px calc(var(--m) + var(--lane)) 32px var(--m); }
+.model-list li > * { position: relative; z-index: 2; }
+.model-list li:nth-child(odd) { background: var(--paper-2); }
+.model-list .head { grid-column: 1 / 8; }
+.model-list .body { grid-column: 8 / 13; }
+.band { z-index: auto; margin: 0 calc(-1 * (var(--m) + var(--lane))) 0 calc(-1 * var(--m)); }
+.draw-band { aspect-ratio: 1600 / 768; }
+.draw-band > img, .draw-band > svg { height: 100%; object-fit: cover; }
+.band-cap { position: absolute; left: var(--m); bottom: 0; z-index: 2; max-width: 46ch; margin: 0; padding: 12px 16px 16px; background: var(--ink); color: var(--paper);
+            font-size: var(--t-small); line-height: 1.4; }
+/* the road comes off the lane and takes the highway in the drawing, top to bottom */
+.w-m3 { left: calc(100% - var(--m) - var(--lane) / 2); top: -48px; }
+.w-b0 { left: calc(100% - var(--m) - var(--lane) * .9); top: 10%; }
+.w-b1 { left: 54.4%; top: 10%; }
+.s-ruta5 { left: 62.2%; top: 50%; }
+.w-b2 { left: 72%; top: 100%; }
+
+/* ---------- 4. the route solve ---------- */
+.routes { padding: var(--sec) calc(var(--m) + var(--lane)) var(--sec) var(--m); background: var(--paper-2); }
+.w-r1 { left: calc(100% - var(--m) - var(--lane) / 2); top: calc(var(--sec) * .5); }
+.routes-top { z-index: auto; }
+.routes-copy, .map { position: relative; z-index: 2; }
+.s-solve { left: calc(100% + var(--lane) / 2); top: 44%; }
+.routes-copy { grid-column: 1 / 7; display: grid; gap: 28px; align-content: start; }
+.map { grid-column: 7 / 13; }
+.map-frame { position: relative; aspect-ratio: 4 / 3; background: var(--paper); overflow: hidden; }
+.map-base, .map-plan { position: absolute; inset: 0; width: 100%; height: 100%; }
+.route { fill: none; stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.r1 { stroke: var(--b); }
+.r2 { stroke: var(--route-2); }
+.map-plan .stop { fill: var(--ink); stroke: var(--paper); stroke-width: 2.5; }
+.depot { fill: var(--a); stroke: var(--ink); stroke-width: 3.5; }
+.map figcaption { margin-top: 12px; font-size: var(--t-small); line-height: 1.4; color: var(--ink-2); }
+.map-key { position: absolute; left: 0; top: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 8px 12px; background: var(--paper); font-size: var(--t-small); line-height: 1.4; }
+.key i { display: inline-block; width: 20px; height: 4px; margin-right: 8px; vertical-align: middle; }
+.key .k1 { background: var(--b); }
+.key .k2 { background: var(--route-2); }
+.key .k3 { width: 13px; height: 13px; background: var(--a); outline: 2.5px solid var(--ink); outline-offset: -2.5px; }
+.specs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 12vh; }
+.spec-fig { margin: 0; font-family: var(--display); font-weight: 900; font-size: var(--t-giant); line-height: .82;
+            font-variant-numeric: tabular-nums lining-nums; letter-spacing: .004em; white-space: nowrap; }
+.spec + .spec .spec-fig { color: var(--b); }
+.spec-cap { margin-top: 12px; font-size: var(--t-small); font-weight: 600; }
+.routes-foot { gap: 16px 24px; margin-top: 40px; }
+.routes-foot .state { grid-column: 1 / 9; }
+.routes-foot .body, .routes-foot .small { grid-column: 1 / 8; }
+.routes-foot .small { color: var(--ink-2); }
+
+/* ---------- 5. how we work: the accordion, dark to light ---------- */
+.how { padding: var(--sec) calc(var(--m) + var(--lane)) var(--sec) var(--m); background: var(--paper); }
+.w-o1 { left: calc(100% - var(--m) - var(--lane) * .72); top: 55%; }
+.how-top { align-items: end; margin-bottom: 64px; }
+.how-top .head { grid-column: 1 / 7; }
+.how-top .body { grid-column: 7 / 13; }
+.stages { list-style: none; margin: 0; padding: 0; }
+.stage { --bg: var(--run-1); --fg: var(--run-ink-dark); background: var(--bg); color: var(--fg); }
+.stage:nth-child(2) { --bg: var(--run-2); }
+.stage:nth-child(3) { --bg: var(--run-3); }
+.stage:nth-child(4) { --bg: var(--run-4); --fg: var(--run-ink-light); }
+.stage:nth-child(5) { --bg: var(--run-5); --fg: var(--run-ink-light); }
+.stage-h { margin: 0; }
+.stage-btn { display: block; width: 100%; padding: 20px 24px; border: 0; background: none; color: inherit; text-align: left; cursor: pointer;
+             font: 600 var(--t-lead)/1.2 var(--text); }
+.stage-btn:focus-visible { outline-color: var(--fg); outline-offset: -6px; }
+.stage-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: end; padding: 0 24px 24px; }
+.stage-pic { background: var(--paper); }
+.stage-pic .ink { stroke-width: 3.6; }
+/* with script: one row, the open stage takes most of it, the rest are slivers with their names upright */
+.js .stages { display: flex; height: 540px; }
+.js .stage { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; transition: flex-grow .45s var(--ease); }
+.js .stage.is-open { flex-grow: 5.6; }
+.js .stage-btn { position: absolute; inset: 0; padding: 0; }
+.js .stage-btn span { position: absolute; left: 22px; bottom: 22px; writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap; }
+.js .stage.is-open .stage-btn { position: relative; inset: auto; padding: 28px 28px 0; cursor: default; }
+.js .stage.is-open .stage-btn span { position: static; writing-mode: horizontal-tb; transform: none; font-family: var(--display); font-weight: 900;
+                                     font-size: var(--t-head); line-height: .96; text-transform: uppercase; }
+.js .stage-body { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 28px 28px; opacity: 0; visibility: hidden; }
+.js .stage.is-open .stage-body { opacity: 1; visibility: visible; transition: opacity .35s var(--ease) .18s; }
+.js .stage:not(.is-open):hover { filter: brightness(1.08); }
+
+/* ---------- 6. prices: plans that step up ---------- */
+.prices { padding: var(--sec) calc(var(--m) + var(--lane)) var(--sec) var(--m); background: var(--paper-2); }
+.prices > .head { position: absolute; top: var(--sec); left: var(--m); max-width: 32%; }
+.tiers { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.tier { display: flex; flex-direction: column; justify-content: space-between; background: var(--bg); color: var(--fg); }
+.tier-1 { --bg: var(--a); --fg: var(--a-ink); --strip: var(--a-2); height: 440px; }
+.tier-2 { --bg: var(--b); --fg: var(--b-ink); --strip: var(--b-2); height: 560px; }
+.tier-3 { --bg: var(--ink); --fg: var(--paper); --strip: var(--ink-strip); height: 680px; }
+.tier-in { padding: 28px; display: grid; gap: 8px; align-content: start; }
+.tier-name { margin: 0; font: 600 var(--t-lead)/1.15 var(--text); }
+.tier-price { margin: 4px 0 0; font-family: var(--display); font-weight: 900; font-size: var(--t-head); line-height: .95; text-transform: uppercase;
+              font-variant-numeric: lining-nums; }
+.tier-unit { margin: 2px 0 0; font: 600 var(--t-lead)/1.2 var(--text); }
+.tier-pesos { margin: 0 0 12px; font-size: var(--t-small); font-variant-numeric: tabular-nums; }
+.tier-lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: var(--t-body); line-height: 1.4; }
+.tier-cta { display: flex; align-items: center; min-height: 64px; padding: 0 28px; background: var(--strip); color: var(--fg);
+            font-size: var(--t-lead); font-weight: 600; text-decoration: none; transition: background-color .16s var(--ease); }
+.tier-cta:hover { background: var(--ink); color: var(--paper); }
+.tier-3 .tier-cta:hover { background: var(--a); color: var(--a-ink); }
+.tier-cta:focus-visible { outline-color: var(--fg); outline-offset: -6px; }
+.prices-note { margin-top: 36px; max-width: 54ch; }
+
+/* ---------- 7. the founders' letter ---------- */
+.team { padding: var(--sec) calc(var(--m) + var(--lane)) var(--sec) var(--m); background: var(--paper); }
+.w-t1 { left: calc(100% - var(--m) - var(--lane) / 2); top: 12%; }
+.w-t2 { left: max(78%, calc(50% + 21em)); top: 56%; }
+.team > .head { text-align: center; margin-bottom: 72px; }
+.letter { max-width: 32em; margin: 0 auto; font-size: var(--t-body); line-height: 1.6; }
+.letter p { margin: 0 0 1.1em; }
+.faces { display: flex; gap: 8px; margin-bottom: 32px; }
+.face { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; font: 600 var(--t-small)/1 var(--text); }
+.face-1 { background: var(--a); color: var(--a-ink); }
+.face-2 { background: var(--b); color: var(--b-ink); }
+.face-3 { background: var(--ink); color: var(--paper); }
+.letter .sign { display: grid; gap: 2px; margin-top: 1.8em; font-size: var(--t-lead); font-weight: 600; line-height: 1.3; }
+
+/* ---------- 8. questions: index cards in a drawer ---------- */
+.faq { padding: var(--sec) calc(var(--m) + var(--lane)) var(--sec) var(--m); background: var(--a); color: var(--a-ink); }
+.w-f1 { left: calc(100% - var(--m) - var(--lane) * .3); top: 50%; }
+.faq > .head, .cards { margin-left: 14%; margin-right: 6%; }
+.faq > .head { margin-bottom: 56px; }
+.card { --tab-w: 190px; --step: 130px; --tab-x: calc(var(--n) * var(--step)); position: relative; padding: 40px 0 28px; background: var(--bg); color: var(--fg);
+        clip-path: polygon(0 40px, var(--tab-x) 40px, var(--tab-x) 0, calc(var(--tab-x) + var(--tab-w)) 0, calc(var(--tab-x) + var(--tab-w)) 40px, 100% 40px, 100% 100%, 0 100%); }
+.card + .card { margin-top: -28px; }   /* the next tab rises into the empty foot of the card above */
+.card:nth-child(1) { --n: 0; z-index: 1; } .card:nth-child(2) { --n: 1; z-index: 2; } .card:nth-child(3) { --n: 2; z-index: 3; }
+.card:nth-child(4) { --n: 3; z-index: 4; } .card:nth-child(5) { --n: 4; z-index: 5; } .card:nth-child(6) { --n: 5; z-index: 6; }
+.card-1 { --bg: var(--paper); --fg: var(--ink); }
+.card-2 { --bg: var(--paper-2); --fg: var(--ink); }
+.card-3 { --bg: var(--b); --fg: var(--b-ink); }
+.card-h { margin: 0; }
+.card-btn { display: block; width: 100%; padding: 12px 28px 16px; border: 0; background: none; color: inherit; text-align: left; cursor: pointer; font: inherit; }
+.card-btn:focus-visible { outline-color: var(--fg); outline-offset: -6px; }
+.tab { position: absolute; top: 0; left: var(--tab-x); width: var(--tab-w); height: 40px; display: flex; align-items: center; padding: 0 16px;
+       box-sizing: border-box; font: 600 var(--t-small)/1 var(--text); }
+.q { display: block; font: 500 var(--t-lead)/1.3 var(--text); }
+.card-a { padding: 0 28px; }
+.card-a .body { padding-bottom: 24px; max-width: 52ch; }
+.js .card-a { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .4s var(--ease); }
+.js .card-a-in { overflow: hidden; min-height: 0; }   /* collapses to nothing: the spacing lives inside it */
+.js .card.is-open .card-a { grid-template-rows: 1fr; }
+.js .card:not(.is-open) .card-btn:hover .q { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .2em; }
+
+/* ---------- 9. contact: the destination, then display rows ---------- */
+.contact { padding: var(--sec) 0 0; background: var(--b); color: var(--b-ink); }
+.w-k1 { left: calc(100% - var(--m) - var(--lane) / 2); top: 0; }
+.contact-top { z-index: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 24px;
+               padding: 0 calc(var(--m) + var(--lane) * .35) 40px var(--m); }
+.contact-top .head { position: relative; z-index: 2; justify-self: start; }
+.prop-office { width: calc(543px * var(--kp)); margin-top: calc(var(--sec) * -.5); }
+.prop-office .w-k2 { left: 100%; top: 52%; }
+.s-destino { left: 63.4%; top: 81.83%; }
+.s-destino .pin-cap { right: 104px; top: -64px; }   /* beside the building, clear of the truck at the door */
+.contact :focus-visible { outline-color: var(--a); }
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { display: flex; align-items: flex-end; width: 100%; min-height: 150px; box-sizing: border-box; padding: 0 var(--m) 24px; margin: 0; border: 0;
+       background: var(--band); color: var(--b-ink); font-family: var(--display); font-weight: 900; font-size: var(--t-head); line-height: .96;
+       text-transform: uppercase; text-align: left; text-decoration: none; cursor: pointer; transition: background-color .16s var(--ease), color .16s var(--ease); }
+.rows > li:nth-child(odd) .row { --band: var(--b-2); }
+.rows > li:nth-child(even) .row { --band: var(--b); }
+.row:hover { background: var(--a); color: var(--a-ink); }
+.row:focus-visible { outline-offset: -8px; }
+.form-panel { background: var(--paper); color: var(--ink); padding: 40px var(--m) 56px; }
+.form-panel :focus-visible { outline-color: var(--ink); }
+.form { position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 24px; max-width: 1180px; }
+.f label { display: block; margin-bottom: 8px; font-size: var(--t-small); font-weight: 600; }
+.f input, .f textarea { display: block; width: 100%; box-sizing: border-box; margin: 0; padding: 12px 16px; border: 2px solid var(--paper-2); border-radius: 0;
+                        background: var(--paper-2); color: var(--ink); font: 400 var(--t-body)/1.4 var(--text); caret-color: var(--ink); }
+.f input { height: 52px; }
+.f textarea { resize: vertical; min-height: 120px; }
+.f input:hover, .f textarea:hover { border-color: var(--ink-2); }
+.f input:focus-visible, .f textarea:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.f-wide { grid-column: 1 / -1; }
+.hp { position: absolute; left: -10000px; top: 0; opacity: 0; pointer-events: none; }   /* the bot trap, off screen */
+.form-end { grid-column: 1 / -1; display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.submit { height: 56px; padding: 0 32px; border: 0; background: var(--ink); color: var(--paper); font: 600 var(--t-body)/1 var(--text); cursor: pointer;
+          transition: background-color .16s var(--ease); }
+.submit:hover { background: var(--b-2); }
+.submit:active { transform: translateY(1px); }
+.submit:disabled { opacity: .55; cursor: not-allowed; }
+.form-status { grid-column: 1 / -1; min-height: 1.5em; margin: 0; font-weight: 600; }
+
+/* ---------- footer: the address is the headline ---------- */
+.end { box-sizing: border-box; min-height: 90svh; display: grid; grid-template-rows: auto 1fr auto; padding: 40px var(--m) 28px;
+       background: var(--ink); color: var(--paper); }
+.end :focus-visible { outline-color: var(--a); }
+.end-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; font-size: var(--t-small); }
+.end-top p { margin: 0; }
+.end-mail { align-self: end; margin: 0 0 36px; font-family: var(--display); font-weight: 900; font-size: var(--t-giant); line-height: .9; letter-spacing: .004em; }
+.end-mail a { text-decoration: none; }
+.end-mail a:hover { color: var(--a); }
+.end-meta { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px 24px; align-items: end; font-size: var(--t-small); line-height: 1.45; }
+.end-meta p { margin: 0; }
+.credits { max-width: 52ch; }
+
+/* ---------- motion (only with script; the page is complete without it) ---------- */
+.js:not(.go) .top, .js:not(.go) .hero-sub, .js:not(.go) .hero-cta, .js:not(.go) .hero .pin, .js:not(.go) .story { opacity: 0; }
+.js:not(.go) .hero .ln > span { transform: translateY(108%); }
+.go .top, .go .hero-sub, .go .hero-cta { opacity: 1; transition: opacity .5s var(--ease) .9s, background-color .2s linear; }
+.go .hero .pin, .go .story { opacity: 1; transition: opacity .6s var(--ease) 1.2s; }
+.go .hero .ln > span { transition: transform .9s var(--ease) .25s; }
+.go .hero .ln + .ln > span { transition-delay: .36s; }
+.js .head.rv .ln > span { transform: translateY(108%); }
+.js .head.rv.in .ln > span { transform: none; transition: transform .75s var(--ease); }
+.js .head.rv.in .ln + .ln > span { transition-delay: .08s; }
+.js .tiers.rv .tier { clip-path: inset(100% 0 0 0); }
+.js .tiers.rv.in .tier { clip-path: inset(0); transition: clip-path .65s var(--ease); }
+.js .tiers.rv.in .tier-2 { transition-delay: .09s; }
+.js .tiers.rv.in .tier-3 { transition-delay: .18s; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { transition-duration: 0s !important; transition-delay: 0s !important; animation: none !important; }
+  .js .head.rv .ln > span, .js:not(.go) .hero .ln > span { transform: none; }
+  .js:not(.go) .top, .js:not(.go) .hero-sub, .js:not(.go) .hero-cta, .js:not(.go) .hero .pin, .js:not(.go) .story { opacity: 1; }
+  .js .tiers.rv .tier { clip-path: none; }
+  .menu-list li { transform: none; opacity: 1; }
+}
+@media print { .story, .top, .menu { display: none; } }
+
+/* ---------- tablet and phone ---------- */
+@media (max-width: 899px) {
+  .top { padding: 8px var(--m); }
+  .wm-svg { height: 38px; }
+  .btn { height: 44px; padding: 0 16px; }
+  .menu { padding-top: 88px; }
+  .menu-list a { font-size: clamp(40px, 11vw, 64px); }
+
+  .hero { --h1: clamp(40px, 12.6vw, 96px); padding-top: clamp(92px, 13svh, 128px); }
+  .hero-copy { gap: 20px; }
+  .hero-ground { margin-top: 28px; min-height: 230px; }
+  .s-salida { left: 16%; top: 76%; }
+  .s-salida .pin-cap { left: -12px; top: auto; bottom: 46px; }
+  .w-h1 { left: 40%; top: 73%; }
+  .s-pedido1 { left: 64%; top: 86%; }
+  .w-h2 { left: 84%; top: 96%; }
+
+  .calc { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .calc > * { grid-column: 1 !important; grid-row: auto !important; }
+  .calc-head { padding-bottom: 16px; }
+  .draw-calc { order: 1; margin: 0 calc(-1 * (var(--m) + var(--lane))) 0 calc(-1 * var(--m)); }   /* below the answer: the hint's arrow stays short */
+  .prop-bodega { order: 2; justify-self: center; margin: 0; }
+  .s-bodega .pin-cap { top: auto; left: calc(-661px * var(--kp) * .62); bottom: calc(556px * var(--kp) * .74); }
+  .calc-foot { order: 3; align-self: start; }
+
+  .models-top, .routes-top, .how-top, .model-list li, .routes-foot { grid-template-columns: minmax(0, 1fr); }
+  .models-top > *, .model-list li > *, .routes-top > :not(.pin), .how-top > *, .routes-foot > * { grid-column: 1 / -1 !important; }
+  .models-top { margin-bottom: 40px; gap: 32px; }
+  .models-pic { margin-left: calc(-1 * var(--m)); }
+  .model-list li { gap: 8px; padding: 24px calc(var(--m) + var(--lane)) 24px var(--m); }
+  .draw-band { aspect-ratio: 4 / 3; }
+  .w-b1 { left: 56.2%; }
+  .s-ruta5 { left: 69%; }
+  .w-b2 { left: 85%; }
+  .band-cap { right: var(--m); }
+  .map { margin-top: 12px; }
+  .specs { grid-template-columns: minmax(0, 1fr); gap: 32px; margin-top: 56px; }
+  .cap-lane .pin-cap { display: none; }
+  .pin-cap { max-width: min(14em, 52vw); }
+  .cap-right .pin-cap { left: auto; right: 24px; }
+  .s-pedido2 .pin-cap { left: auto; right: -40px; }
+
+  .how-top { margin-bottom: 40px; gap: 16px; }
+  .js .stages { display: block; height: auto; }
+  .js .stage { flex: none; overflow: visible; }
+  .js .stage-btn { position: relative; inset: auto; padding: 0 20px; min-height: 64px; display: flex; align-items: center; }
+  .js .stage-btn span, .js .stage.is-open .stage-btn span { position: static; writing-mode: horizontal-tb; transform: none; font: 600 var(--t-lead)/1.2 var(--text); text-transform: none; }
+  .js .stage.is-open .stage-btn { padding: 0 20px; cursor: default; }
+  .js .stage-body, .stage-body { position: static; display: none; grid-template-columns: minmax(0, 1fr); padding: 0 20px 24px; opacity: 1; visibility: visible; }
+  .js .stage.is-open .stage-body, .stage-body { display: grid; }
+  .js .stage:not(.is-open) .stage-body { display: none; }
+
+  .prices > .head { position: relative; top: auto; left: auto; max-width: none; margin-bottom: 36px; }
+  .tiers { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .tier-1, .tier-2, .tier-3 { height: auto; }
+  .tier-in { padding: 24px 20px 28px; }
+  .tier-cta { padding: 0 20px; }
+
+  .w-t2 { left: calc(100% - var(--m) - var(--lane) / 2); }
+  .faq > .head, .cards { margin-left: 0; margin-right: 0; }
+  .card { --tab-w: 118px; --step: 46px; }
+  .tab { padding: 0 12px; }
+  .card-btn { padding: 12px 20px 16px; }
+  .card-a { padding-left: 20px; padding-right: 20px; }
+
+  .contact-top { grid-template-columns: minmax(0, 1fr); padding-right: calc(var(--m) + var(--lane)); }
+  .prop-office { grid-row: 1; justify-self: end; margin: 0; }
+  .row { min-height: 96px; padding-bottom: 16px; }
+  .form { grid-template-columns: minmax(0, 1fr); }
+  .form-panel { padding: 28px var(--m) 40px; }
+
+  .end { min-height: 72svh; }
+  .end-meta { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 599px) {
+  .hero { --h1: clamp(40px, 13.4vw, 64px); }
+  .head { font-size: clamp(38px, 11vw, 56px); }
+  .calc { gap: 28px; }
+}

@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>argmin: optimización de stock, compras, rutas y turnos para pymes</title>
+<meta name="description" content="Optimizamos stock, compras, rutas y turnos de pymes chilenas con modelos matemáticos y sus propios datos, y cobramos contra el ahorro medido en pesos. Diagnóstico de 2 semanas desde 15 UF.">
+<link rel="canonical" href="https://argmin.cl/">
+<link rel="alternate" hreflang="es-CL" href="https://argmin.cl/">
+<link rel="alternate" hreflang="en" href="https://argmin.cl/en/">
+<link rel="alternate" hreflang="x-default" href="https://argmin.cl/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="argmin">
+<meta property="og:title" content="argmin: optimización de stock, compras, rutas y turnos para pymes">
+<meta property="og:description" content="Optimizamos stock, compras, rutas y turnos de pymes chilenas con modelos matemáticos y sus propios datos, y cobramos contra el ahorro medido en pesos. Diagnóstico de 2 semanas desde 15 UF.">
+<meta property="og:url" content="https://argmin.cl/">
+<meta property="og:locale" content="es_CL">
+<meta property="og:image" content="https://argmin.cl/assets/og-es.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="argmin. Tu operación, al mínimo costo.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f6f7f4">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="preload" href="/assets/fonts/sofia-sans-extra-condensed-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/css/site.css">
+<script>document.documentElement.classList.add('js')</script>
+<script src="/js/site.js" defer></script>
+<script type="module" src="/js/calc.js"></script>
+<script type="module" src="/js/routes.js"></script>
+<script type="module" src="/js/draw.js"></script>
+<script type="module" src="/js/story.js"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","name":"argmin","url":"https://argmin.cl/","email":"hola@argmin.cl","description":"Optimizamos stock, compras, rutas y turnos de pymes chilenas con modelos matemáticos y sus propios datos, y cobramos contra el ahorro medido en pesos. Diagnóstico de 2 semanas desde 15 UF.","areaServed":"CL","address":{"@type":"PostalAddress","addressLocality":"Santiago","addressCountry":"CL"},"founder":[{"@type":"Person","name":"Matías Morgado"},{"@type":"Person","name":"Juan Pedro Lira"},{"@type":"Person","name":"Tomás Erdmannsdörffer"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top" id="top">
+  <a class="wm" href="#top" aria-label="argmin, inicio"><svg class="wm-svg" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="24 -679 3198 1337"><path fill="currentColor" d="M63 -359Q63 -373 71 -391Q84 -418 123 -433Q162 -448 218 -448Q284 -448 332.5 -418Q381 -388 396 -340Q401 -326 401.5 -308.5Q402 -291 402 -194Q402 -96 402.5 -79.5Q403 -63 408 -54Q414 -40 428 -40Q441 -40 447 -54Q453 -66 453 -109V-145H493V-106Q492 -66 490 -59Q481 -31 457 -12.5Q433 6 400 6Q375 6 355.5 -11.5Q336 -29 329 -54V-58Q326 -55 317 -44.5Q308 -34 304 -30Q255 11 190 11Q138 11 97 -11Q56 -33 42 -69Q34 -88 34 -107Q34 -154 73 -193Q96 -216 130 -231Q198 -262 304 -268H318V-290Q318 -324 312 -340Q302 -373 277 -392Q252 -411 215 -411Q148 -411 148 -403Q170 -388 170 -359Q170 -337 154.5 -321Q139 -305 116 -305Q93 -305 78 -321Q63 -337 63 -359ZM318 -175Q318 -233 317 -233Q314 -233 312 -232Q175 -223 137 -151Q126 -131 126 -106Q126 -72 150 -49Q174 -26 209 -26Q249 -26 277.5 -50Q306 -74 315 -109Q317 -116 318 -175Z M522 -431Q526 -431 597.5 -436.5Q669 -442 671 -442H674V-373Q693 -405 716 -423Q739 -441 777 -441Q805 -441 825 -430Q864 -410 864 -373Q864 -351 849 -336.5Q834 -322 813 -322Q792 -322 777.5 -336Q763 -350 763 -372Q763 -389 771 -400Q773 -404 773 -405Q771 -407 750 -401Q734 -393 726 -386Q686 -348 680 -260V-221Q679 -182 679 -154Q679 -141 679 -126.5Q679 -112 679.5 -101Q680 -90 680 -81Q680 -72 680 -66V-61Q684 -53 692 -51Q702 -47 745 -46H776V0H767Q749 -3 640 -3Q542 -3 528 0H520V-46H536H547Q589 -46 597 -60V-68Q597 -77 597.5 -91Q598 -105 598 -122.5Q598 -140 598 -161.5Q598 -183 598 -203Q598 -234 598 -269.5Q598 -305 598 -328L597 -351Q594 -370 582.5 -376.5Q571 -383 538 -385H520V-408Q520 -431 522 -431Z M1221 -409Q1265 -453 1322 -453Q1347 -453 1362 -437.5Q1377 -422 1377 -396Q1377 -380 1367 -370Q1357 -360 1341 -360Q1309 -360 1304 -390Q1302 -404 1307 -411Q1307 -412 1308 -414V-415Q1304 -414 1299 -413Q1275 -409 1255 -393Q1247 -388 1247 -386Q1249 -384 1251 -381Q1284 -340 1284 -292Q1284 -251 1257 -212Q1210 -143 1114 -143Q1066 -143 1015 -171Q1004 -151 1004 -133Q1004 -98 1030 -81Q1039 -75 1047.5 -74.5Q1056 -74 1119 -73Q1203 -72 1227 -67Q1340 -50 1360 45Q1362 53 1362 72Q1362 90 1360 96Q1346 147 1283 176.5Q1220 206 1142 206Q1060 206 999 175Q937 145 923 96Q921 90 921 75Q921 34 952 5Q967 -10 984 -18L995 -24Q959 -55 959 -108Q959 -154 988 -193Q944 -237 944 -292Q944 -334 971 -373Q992 -404 1030 -423Q1068 -442 1115 -442Q1166 -442 1210 -416ZM1034 -292Q1034 -238 1051 -210Q1068 -182 1114 -182Q1146 -182 1166 -198.5Q1186 -215 1191 -242Q1194 -258 1194 -292Q1194 -326 1191 -343Q1179 -404 1113 -404Q1084 -404 1063 -387.5Q1042 -371 1037 -343Q1034 -327 1034 -292ZM1267 23Q1245 8 1217.5 4Q1190 0 1139 0H1110Q1043 0 1030 6Q1010 15 998.5 34Q987 53 987 74Q987 85 990 94Q998 117 1026 136.5Q1054 156 1091 163Q1109 167 1142 167Q1174 167 1192 163Q1229 155 1257.5 135.5Q1286 116 1293 93Q1295 88 1295 75Q1295 41 1267 23Z M1585.7 -431Q1589.7 -431 1662.2 -436.5Q1734.7 -442 1736.7 -442H1739.7V-402Q1739.7 -364 1740.7 -364L1741.7 -365Q1795.7 -442 1894.7 -442Q1991.7 -439 2013.7 -366L2015.7 -361Q2039.7 -391 2042.7 -394Q2093.7 -442 2161.7 -442Q2286.7 -442 2298.7 -329Q2299.7 -322 2299.7 -190Q2299.7 -62 2300.7 -60Q2308.7 -46 2350.7 -46H2361.7H2377.7V0H2369.7Q2356.7 -3 2257.7 -3Q2158.7 -3 2145.7 0H2137.7V-46H2153.7H2161.7Q2214.7 -46 2214.7 -62Q2215.7 -64 2215.7 -200Q2214.7 -335 2213.7 -343Q2206.7 -375 2191.2 -389.5Q2175.7 -404 2143.7 -404Q2098.7 -404 2064.7 -370Q2029.7 -335 2023.7 -282Q2023.7 -281 2023.2 -263.5Q2022.7 -246 2022.7 -219Q2022.7 -192 2022.7 -168Q2022.7 -153 2022.7 -136.5Q2022.7 -120 2022.7 -107Q2022.7 -94 2023.2 -83.5Q2023.7 -73 2023.7 -66V-60Q2031.7 -46 2073.7 -46H2084.7H2100.7V0H2092.7Q2079.7 -3 1980.7 -3Q1881.7 -3 1868.7 0H1860.7V-46H1876.7H1884.7Q1937.7 -46 1937.7 -62Q1938.7 -64 1938.7 -200Q1937.7 -335 1936.7 -343Q1929.7 -375 1914.2 -389.5Q1898.7 -404 1866.7 -404Q1821.7 -404 1787.7 -370Q1752.7 -335 1746.7 -282Q1746.7 -281 1746.7 -263.5Q1746.7 -246 1746.2 -219Q1745.7 -192 1745.7 -168Q1745.7 -153 1745.7 -136.5Q1745.7 -120 1746.2 -107Q1746.7 -94 1746.7 -83.5Q1746.7 -73 1746.7 -66V-60Q1754.7 -46 1796.7 -46H1807.7H1823.7V0H1815.7Q1802.7 -3 1703.7 -3Q1604.7 -3 1591.7 0H1583.7V-46H1599.7H1610.7Q1652.7 -46 1660.7 -60V-68Q1660.7 -77 1660.7 -91Q1660.7 -105 1661.2 -122.5Q1661.7 -140 1661.7 -161.5Q1661.7 -183 1661.7 -203Q1661.7 -234 1661.2 -269.5Q1660.7 -305 1660.7 -328V-351Q1657.7 -370 1646.2 -376.5Q1634.7 -383 1601.7 -385H1583.7V-408Q1583.7 -431 1585.7 -431Z M2522.7 -669Q2547.7 -667 2563.7 -651.5Q2579.7 -636 2579.7 -609Q2579.7 -573 2552.7 -558Q2539.7 -549 2520.7 -549Q2479.7 -549 2462.7 -589Q2460.7 -595 2460.7 -609Q2460.7 -637 2478.2 -653Q2495.7 -669 2522.7 -669ZM2423.7 -431Q2427.7 -431 2499.7 -436.5Q2571.7 -442 2573.7 -442H2576.7V-62Q2581.7 -52 2588.7 -49.5Q2595.7 -47 2623.7 -46H2646.7V0H2638.7Q2627.7 -3 2534.7 -3Q2443.7 -3 2425.7 0H2417.7V-46H2433.7H2444.7Q2486.7 -46 2494.7 -60Q2495.7 -62 2495.7 -205Q2495.7 -355 2491.7 -365Q2483.7 -385 2432.7 -385H2421.7V-408Q2421.7 -431 2423.7 -431Z M2696.7 -431Q2700.7 -431 2773.2 -436.5Q2845.7 -442 2847.7 -442H2850.7V-402Q2850.7 -364 2851.7 -364L2852.7 -365Q2906.7 -442 3005.7 -442Q3120.7 -438 3132.7 -329Q3133.7 -322 3133.7 -190Q3133.7 -62 3134.7 -60Q3142.7 -46 3184.7 -46H3195.7H3211.7V0H3203.7Q3190.7 -3 3091.7 -3Q2992.7 -3 2979.7 0H2971.7V-46H2987.7H2995.7Q3048.7 -46 3048.7 -62Q3049.7 -64 3049.7 -200Q3048.7 -335 3047.7 -343Q3040.7 -375 3025.2 -389.5Q3009.7 -404 2977.7 -404Q2932.7 -404 2898.7 -370Q2863.7 -335 2857.7 -282Q2857.7 -281 2857.7 -263.5Q2857.7 -246 2857.2 -219Q2856.7 -192 2856.7 -168Q2856.7 -153 2856.7 -136.5Q2856.7 -120 2857.2 -107Q2857.7 -94 2857.7 -83.5Q2857.7 -73 2857.7 -66V-60Q2865.7 -46 2907.7 -46H2918.7H2934.7V0H2926.7Q2913.7 -3 2814.7 -3Q2715.7 -3 2702.7 0H2694.7V-46H2710.7H2721.7Q2763.7 -46 2771.7 -60V-68Q2771.7 -77 2771.7 -91Q2771.7 -105 2772.2 -122.5Q2772.7 -140 2772.7 -161.5Q2772.7 -183 2772.7 -203Q2772.7 -234 2772.2 -269.5Q2771.7 -305 2771.7 -328V-351Q2768.7 -370 2757.2 -376.5Q2745.7 -383 2712.7 -385H2694.7V-408Q2694.7 -431 2696.7 -431Z M2232.6 445.4Q2228.4 441.2 2228.4 437.7Q2231.2 418.8 2250.1 389.4Q2283 339.7 2332.7 332Q2342.5 330.6 2347.4 330.6Q2371.9 330.6 2392.5 343.2Q2413.2 355.8 2422.3 374.7Q2431.4 362.8 2433.5 360Q2459.4 330.6 2493 330.6Q2521.7 330.6 2539.5 347.1Q2557.4 363.5 2557.4 387.3Q2557.4 409 2545.1 423.7Q2532.9 438.4 2512.6 438.4Q2499.3 438.4 2490.9 430.7Q2482.5 423 2482.5 410.4Q2482.5 378.2 2517.5 366.3Q2517.5 365.6 2509.8 361.4Q2502.8 357.2 2489.5 357.2Q2480.4 357.2 2476.2 358.6Q2449.6 369.8 2437 404.8Q2434.9 410.4 2416.7 482.8Q2398.5 555.3 2397.1 564.4Q2395 574.9 2395 585.4Q2395 602.2 2404.8 612Q2414.6 621.8 2430.7 621.8Q2460.1 621.8 2483.9 597Q2507.7 572.1 2516.1 542Q2518.2 535 2520.3 534Q2522.4 532.9 2531.5 532.9Q2544.8 532.9 2544.8 538.5Q2544.8 539.2 2543.4 546.2Q2531.5 589.6 2494.4 621.8Q2461.5 647.7 2425.1 647.7Q2376.1 647.7 2350.9 603.6Q2330.6 635.1 2299.1 645.6Q2292.8 647 2280.9 647Q2240.3 647 2223.5 618.3Q2216.5 606.4 2216.5 590.3Q2216.5 569.3 2229.1 554.6Q2241.7 539.9 2261.3 539.9Q2291.4 539.9 2291.4 569.3Q2291.4 595.2 2266.9 607.1Q2265.5 607.8 2263.4 608.8Q2261.3 609.9 2259.9 610.6Q2258.5 611.3 2257.8 611.3L2255.7 612Q2255.7 614.1 2266.2 618.3Q2274.6 621.8 2284.4 621.8Q2309.6 621.8 2327.8 590.3Q2335.5 577.7 2355.1 499.3Q2359.3 483.2 2364.2 463.6Q2369.1 444 2371.5 433.5Q2374 423 2374.7 420.9Q2378.2 402 2378.2 393.6Q2378.2 376.8 2369.1 367Q2360 357.2 2343.9 357.2Q2312.4 357.2 2289.3 381.4Q2266.2 405.5 2257.1 437Q2255.7 443.3 2253.9 444.4Q2252.2 445.4 2242.4 445.4Z"/></svg></a>
+  <a class="top-alt" href="/en/" hreflang="en" lang="en">English</a>
+  <a class="top-alt btn" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">Agenda 30 minutos</a>
+  <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menú"><i></i><i></i><i></i></button>
+</header>
+<nav class="menu" id="menu" aria-label="Menú principal" hidden>
+  <ul class="menu-list"><li><a href="#optimizamos">Qué optimizamos</a></li><li><a href="#como">Cómo trabajamos</a></li><li><a href="#precios">Precios</a></li><li><a href="#equipo">Equipo</a></li><li><a href="#contacto">Contacto</a></li></ul>
+  <div class="menu-foot">
+    <a class="btn btn-light" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">Agenda 30 minutos</a>
+    <a href="/en/" hreflang="en" lang="en">English</a>
+    <a href="mailto:hola@argmin.cl" translate="no">hola@argmin.cl</a>
+  </div>
+</nav>
+
+<main id="main">
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="hero-copy">
+      <h1 class="mega" id="hero-h"><span class="ln"><span>Tu operación,</span></span> <span class="ln"><span>al mínimo costo.</span></span></h1>
+      <p class="hero-sub">Optimizamos stock, compras, rutas y turnos de tu pyme con modelos matemáticos y tus datos, y cobramos contra el ahorro en pesos.</p>
+      <a class="btn hero-cta" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">Agenda 30 minutos</a>
+    </div>
+    <figure class="draw hero-ground" data-draw="/assets/draw/port.svg" data-fit="xMidYMin slice" data-on="load"><img src="/assets/draw/port.svg" width="1600" height="597" alt="" loading="eager" decoding="async"></figure>
+    <span class="pin s-salida cap-left" data-mark aria-hidden="true"><span class="pin-cap">8:00. Sale el camión.</span></span><span class="way w-h1" data-mark aria-hidden="true"></span><span class="pin s-pedido1 cap-left" data-mark aria-hidden="true"><span class="pin-cap">Primera entrega.</span></span><span class="way w-h2" data-mark aria-hidden="true"></span>
+  </section>
+
+  <section class="calc" id="calculadora" aria-labelledby="calc-h">
+    <span class="way w-c1" data-mark aria-hidden="true"></span>
+    <div class="calc-head">
+      <h2 class="head" id="calc-h"><span class="ln"><span>Plata parada</span></span> <span class="ln"><span>en bodega.</span></span></h2>
+      <p class="calc-hint" aria-hidden="true">¡Interactúa!</p>
+    </div>
+    <figure class="draw draw-calc" data-draw="/assets/draw/shelves.svg" data-fit="xMidYMid meet"><img src="/assets/draw/shelves.svg" width="1600" height="1007" alt="Repuestos ordenados en las estanterías de una bodega" loading="lazy" decoding="async"></figure>
+    <svg class="calc-arrow" aria-hidden="true" focusable="false"><path class="calc-arrow-line"/><path class="calc-arrow-head"/></svg>
+    <p class="sr" id="c-help">Cambia los tres números: el resultado se calcula con los tuyos.</p>
+    <form class="calc-form state" data-calc data-uf="41237.01" data-locale="es-CL" novalidate>
+      <p>Tengo <span class="field"><label class="sr" for="c-inv">Valor del inventario, en pesos</label><span class="unit">$</span>&nbsp;<input id="c-inv" name="inv" inputmode="numeric" autocomplete="off" spellcheck="false" aria-describedby="c-help" value="80.000.000" size="10"></span> en inventario. El <span class="field"><label class="sr" for="c-stale">Porcentaje del inventario sin movimiento en 90 días</label><input id="c-stale" name="stale" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="c-help" value="30" size="2"></span>&nbsp;% no se ha movido en 90 días, y me financio al <span class="field"><label class="sr" for="c-rate">Tasa de financiamiento mensual, en porcentaje</label><input id="c-rate" name="rate" inputmode="decimal" autocomplete="off" spellcheck="false" aria-describedby="c-help" value="1,5" size="3"></span>&nbsp;% mensual.</p>
+    </form>
+    <div class="calc-result" aria-live="polite">
+      <p class="calc-fig"><output id="c-out" for="c-inv c-stale c-rate">$ 4.695.000</output></p>
+      <p class="state calc-says">es lo que te cuesta al año esa plata parada, solo en intereses. Son <output id="c-uf">113,9</output>&nbsp;UF.</p>
+    </div>
+    <div class="prop prop-bodega"><span class="way w-c2" data-mark aria-hidden="true"></span><img src="/assets/3d/bodega.webp" width="661" height="556" alt="" loading="lazy" decoding="async"><span class="pin s-bodega cap-left" data-mark data-park="bodega" data-face="8" aria-hidden="true"><span class="pin-cap">Vuelve a bodega: ¿cuánto stock está parado?</span></span></div>
+    <div class="calc-foot">
+      <p class="body">No cuenta arriendo de bodega, seguros ni productos que se vuelven obsoletos. Cuánto de ese stock sobra de verdad lo mide el diagnóstico.</p>
+      <a class="link" href="#contacto">Pide el diagnóstico</a>
+    </div>
+    <span class="way w-c3" data-mark aria-hidden="true"></span>
+  </section>
+
+  <section class="models" id="optimizamos" aria-labelledby="models-h">
+    <span class="way w-m1" data-mark aria-hidden="true"></span>
+    <div class="models-top">
+      <div class="models-lead">
+        <h2 class="head" id="models-h"><span class="ln"><span>Si emites factura,</span></span> <span class="ln"><span>ya tienes datos.</span></span></h2>
+        <p class="body">Tus ventas y tus compras, producto por producto, están en tus documentos tributarios, tu ERP y tus planillas. Casi ninguna pyme las usa para decidir. Nosotros las ordenamos y las ponemos a trabajar. Si te faltan datos, armamos contigo la forma de empezar a juntarlos.</p>
+      </div>
+      <div class="models-pic"><span class="way w-mp" data-mark aria-hidden="true"></span><figure class="draw draw-models" data-draw="/assets/draw/meiggs.svg" data-fit="xMidYMid meet"><img src="/assets/draw/meiggs.svg" width="1600" height="1001" alt="Comercio mayorista en la calle Meiggs, Santiago" loading="lazy" decoding="async"></figure><span class="pin s-pedido2 cap-up" data-mark aria-hidden="true"><span class="pin-cap">Cada entrega deja una factura.</span></span><span class="way w-m2" data-mark aria-hidden="true"></span></div>
+    </div>
+    <ul class="model-list">
+      <li><h3 class="head">Stock y reposición</h3><p class="body">Cuánto pedir de cada producto y cuándo, para no quebrar stock ni llenar la bodega de lo que no se vende.</p></li>
+      <li><h3 class="head">Compras</h3><p class="body">A qué proveedor, cuánto y con qué anticipación, según precios, plazos y lo que vas a vender.</p></li>
+      <li><h3 class="head">Pronóstico de demanda</h3><p class="body">Cuánto vas a vender de cada producto, incluso de los que se venden poco y a saltos.</p></li>
+      <li><h3 class="head">Rutas y despachos</h3><p class="body">Qué camión lleva qué pedido y en qué orden, con ventanas horarias y capacidad.</p></li>
+      <li><h3 class="head">Turnos</h3><p class="body">Quién trabaja cuándo, para cubrir la demanda de cada hora sin horas extra de más.</p></li>
+      <li><h3 class="head">Producción</h3><p class="body">Qué fabricar primero y en qué máquina, para cumplir plazos con menos cambios de línea.</p></li>
+    </ul>
+    <div class="band">
+      <figure class="draw draw-band" data-draw="/assets/draw/ruta5.svg" data-fit="xMidYMid slice"><img src="/assets/draw/ruta5.svg" width="1600" height="768" alt="La Ruta 5 Norte vista desde el aire, entre campos y bodegas" loading="lazy" decoding="async"></figure>
+      <p class="band-cap">La Ruta 5 Norte desde el aire, saliendo de Santiago hacia el norte.</p>
+      <span class="way w-m3" data-mark aria-hidden="true"></span><span class="way w-b0" data-mark aria-hidden="true"></span><span class="way w-b1" data-mark aria-hidden="true"></span><span class="pin s-ruta5 cap-right" data-mark aria-hidden="true"><span class="pin-cap">Ruta 5 Norte: cada kilómetro cuesta.</span></span><span class="way w-b2" data-mark aria-hidden="true"></span>
+    </div>
+  </section>
+
+  <section class="routes" id="ejemplo" aria-labelledby="routes-h">
+    <span class="way w-r1" data-mark aria-hidden="true"></span>
+    <div class="routes-top">
+      <span class="pin s-solve cap-lane" data-mark aria-hidden="true"><span class="pin-cap">18 pedidos, 2 camiones.</span></span>
+      <div class="routes-copy">
+        <h2 class="head" id="routes-h"><span class="ln"><span>Mismos camiones,</span></span> <span class="ln"><span>menos kilómetros.</span></span></h2>
+        <p class="body">Un ejemplo de los seis, con pedidos inventados: una distribuidora en Quilicura reparte 18 pedidos con 2 camiones. Primero, el plan que arma una persona con criterio: cada camión su zona, y siempre al pedido más cercano. Después, el que encuentra un modelo en tu navegador, ahora mismo.</p>
+        <button class="textbtn" type="button" id="r-new">Otro día, otros pedidos</button>
+      </div>
+      <figure class="map" data-routes data-seed="3" data-locale="es-CL" data-cpk="500" data-saving="Ahorro del día: {km} km, unos {pesos} a {cpk} por km. En 250 días hábiles, cerca de {year}.">
+        <div class="map-frame">
+          <img class="map-base" src="/assets/santiago.svg" alt="" width="1000" height="750">
+          <p class="map-key"><span class="key"><i class="k1"></i>Camión 1</span><span class="key"><i class="k2"></i>Camión 2</span><span class="key"><i class="k3"></i>Bodega</span></p>
+          <svg class="map-plan" viewBox="0 0 1000 750" role="img" aria-labelledby="map-title"><title id="map-title">Mapa de Santiago con la bodega, 18 pedidos y las rutas de dos camiones</title><g class="routes"><polyline class="route r1" points="374.0,106.5 343.4,265.5 309.6,316.1 391.7,312.8 444.0,339.5 471.3,440.7 576.5,654.0 586.5,546.8 549.2,440.0 500.7,339.5 451.1,273.3 374.0,106.5"/><polyline class="route r2" points="374.0,106.5 495.9,166.2 569.2,119.2 706.8,174.5 715.6,218.3 659.5,346.9 577.7,221.6 494.1,241.1 384.3,208.9 374.0,106.5"/></g><g class="stops"><circle class="stop" cx="309.6" cy="316.1" r="7"/><circle class="stop" cx="715.6" cy="218.3" r="7"/><circle class="stop" cx="586.5" cy="546.8" r="7"/><circle class="stop" cx="471.3" cy="440.7" r="7"/><circle class="stop" cx="451.1" cy="273.3" r="7"/><circle class="stop" cx="495.9" cy="166.2" r="7"/><circle class="stop" cx="576.5" cy="654.0" r="7"/><circle class="stop" cx="494.1" cy="241.1" r="7"/><circle class="stop" cx="577.7" cy="221.6" r="7"/><circle class="stop" cx="391.7" cy="312.8" r="7"/><circle class="stop" cx="659.5" cy="346.9" r="7"/><circle class="stop" cx="500.7" cy="339.5" r="7"/><circle class="stop" cx="384.3" cy="208.9" r="7"/><circle class="stop" cx="444.0" cy="339.5" r="7"/><circle class="stop" cx="706.8" cy="174.5" r="7"/><circle class="stop" cx="343.4" cy="265.5" r="7"/><circle class="stop" cx="549.2" cy="440.0" r="7"/><circle class="stop" cx="569.2" cy="119.2" r="7"/></g><rect class="depot" x="365.0" y="97.5" width="18" height="18"/></svg>
+        </div>
+        <figcaption>Calles: © colaboradores de OpenStreetMap. Distancias aproximadas: 1,35 veces la línea recta.</figcaption>
+      </figure>
+    </div>
+    <div class="specs" aria-live="polite">
+      <figure class="spec"><p class="spec-fig"><span id="r-before">162</span>&nbsp;km</p><figcaption class="spec-cap">Plan hecho a mano</figcaption></figure>
+      <figure class="spec"><p class="spec-fig"><span id="r-after">139</span>&nbsp;km</p><figcaption class="spec-cap">Plan del modelo</figcaption></figure>
+    </div>
+    <div class="routes-foot">
+      <p class="state" id="r-saving">Ahorro del día: 23 km, unos $ 11.500 a $ 500 por km. En 250 días hábiles, cerca de $ 2,9 millones.</p>
+      <p class="body">En 40 días de ejemplo como este, el modelo recortó entre 5 % y 30 % de los kilómetros, 15 % en promedio.</p>
+      <p class="small">El costo por kilómetro es un supuesto para un camión 3/4: diésel cerca de $ 1.400 el litro y 8 km por litro (unos $ 175 por km), con el combustible como un 35 % del costo total. El diagnóstico usa el de tu flota.</p>
+    </div>
+  </section>
+
+  <section class="how" id="como" aria-labelledby="how-h">
+    <span class="way w-o1" data-mark aria-hidden="true"></span>
+    <div class="how-top">
+      <h2 class="head" id="how-h"><span class="ln"><span>Cómo trabajamos.</span></span></h2>
+      <p class="body">Primero medimos, después cobramos. Cada proyecto parte de una línea base que firmas tú, y termina con el ahorro medido contra ella.</p>
+    </div>
+    <ol class="stages">
+      <li class="stage is-open" data-stage="0">
+        <h3 class="stage-h"><button class="stage-btn" type="button" id="stage-0-btn" aria-expanded="true" aria-controls="stage-0"><span>Conversación</span></button></h3>
+        <div class="stage-body" id="stage-0" role="region" aria-labelledby="stage-0-btn">
+          <p class="body">30 minutos, gratis. Nos cuentas cómo operas hoy y vemos si hay un problema que valga la pena resolver. Si no lo hay, te lo decimos.</p>
+          <figure class="draw stage-pic" data-draw="/assets/draw/vega.svg" data-fit="xMidYMid slice"><img src="/assets/draw/vega.svg" width="1600" height="1008" alt="La Vega Central, Santiago" loading="lazy" decoding="async"></figure>
+        </div>
+      </li>
+      <li class="stage" data-stage="1">
+        <h3 class="stage-h"><button class="stage-btn" type="button" id="stage-1-btn" aria-expanded="false" aria-controls="stage-1"><span>Diagnóstico</span></button></h3>
+        <div class="stage-body" id="stage-1" role="region" aria-labelledby="stage-1-btn">
+          <p class="body">Dos semanas en tu operación. Revisamos qué datos tienes y cuáles faltan, firmamos la línea base (capital en bodega, quiebres de stock, horas, kilómetros) y te entregamos tres oportunidades con su ahorro estimado.</p>
+          <figure class="draw stage-pic" data-draw="/assets/draw/shelves.svg" data-fit="xMidYMid slice"><img src="/assets/draw/shelves.svg" width="1600" height="1007" alt="Repuestos en estanterías" loading="lazy" decoding="async"></figure>
+        </div>
+      </li>
+      <li class="stage" data-stage="2">
+        <h3 class="stage-h"><button class="stage-btn" type="button" id="stage-2-btn" aria-expanded="false" aria-controls="stage-2"><span>Datos</span></button></h3>
+        <div class="stage-body" id="stage-2" role="region" aria-labelledby="stage-2-btn">
+          <p class="body">Ordenamos lo que ya existe: documentos del SII, tu ERP, cartolas, planillas. Lo que falta lo empezamos a registrar con flujos automáticos, para que los datos se junten solos.</p>
+          
+        </div>
+      </li>
+      <li class="stage" data-stage="3">
+        <h3 class="stage-h"><button class="stage-btn" type="button" id="stage-3-btn" aria-expanded="false" aria-controls="stage-3"><span>Modelo</span></button></h3>
+        <div class="stage-body" id="stage-3" role="region" aria-labelledby="stage-3-btn">
+          <p class="body">Construimos el modelo de stock, compras, rutas o turnos, con una herramienta que tu equipo usa todos los días.</p>
+          <figure class="draw stage-pic" data-draw="/assets/draw/ruta5.svg" data-fit="xMidYMid slice"><img src="/assets/draw/ruta5.svg" width="1600" height="768" alt="La Ruta 5 Norte desde el aire" loading="lazy" decoding="async"></figure>
+        </div>
+      </li>
+      <li class="stage" data-stage="4">
+        <h3 class="stage-h"><button class="stage-btn" type="button" id="stage-4-btn" aria-expanded="false" aria-controls="stage-4"><span>Operación</span></button></h3>
+        <div class="stage-body" id="stage-4" role="region" aria-labelledby="stage-4-btn">
+          <p class="body">Mensual. Mantenemos el modelo al día, lo monitoreamos y medimos el ahorro contra la línea base. Sin mantención, un modelo se degrada y el ahorro se pierde.</p>
+          <figure class="draw stage-pic" data-draw="/assets/draw/port.svg" data-fit="xMidYMid slice"><img src="/assets/draw/port.svg" width="1600" height="597" alt="El puerto de San Antonio" loading="lazy" decoding="async"></figure>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="prices" id="precios" aria-labelledby="prices-h">
+    <h2 class="head" id="prices-h"><span class="ln"><span>Lo que cuesta.</span></span></h2>
+    <ol class="tiers">
+      <li class="tier tier-1">
+        <div class="tier-in">
+          <h3 class="tier-name">Diagnóstico</h3>
+          <p class="tier-price">15 a 25</p>
+          <p class="tier-unit">UF</p>
+          <p class="tier-pesos" data-pesos="15" data-template="Hoy, {n} UF = {pesos}">Hoy, 15 UF = $ 618.555</p>
+          <ul class="tier-lines"><li>2 semanas</li><li>Mapa de procesos y datos</li><li>Línea base firmada</li><li>3 oportunidades con ahorro estimado</li><li>Se abona al proyecto</li></ul>
+        </div>
+        <a class="tier-cta" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">Agenda 30 minutos</a>
+      </li>
+      <li class="tier tier-2">
+        <div class="tier-in">
+          <h3 class="tier-name">Proyecto</h3>
+          <p class="tier-price">40 a 300</p>
+          <p class="tier-unit">UF</p>
+          <p class="tier-pesos" data-pesos="40" data-template="Hoy, {n} UF = {pesos}">Hoy, 40 UF = $ 1.649.480</p>
+          <ul class="tier-lines"><li>Datos y automatización: 40 a 120 UF, de 3 a 6 semanas</li><li>Optimización: 100 a 300 UF, de 6 a 10 semanas</li><li>Integraciones con SII, ERP, banco y planillas</li><li>Modelo de stock, compras, rutas o turnos</li><li>Nunca más de un tercio del ahorro estimado del primer año</li></ul>
+        </div>
+        <a class="tier-cta" href="#como">Cómo trabajamos</a>
+      </li>
+      <li class="tier tier-3">
+        <div class="tier-in">
+          <h3 class="tier-name">Operación</h3>
+          <p class="tier-price">8 a 30</p>
+          <p class="tier-unit">UF al mes</p>
+          <p class="tier-pesos" data-pesos="8" data-template="Hoy, {n} UF = {pesos}">Hoy, 8 UF = $ 329.896</p>
+          <ul class="tier-lines"><li>Contrato anual</li><li>Hosting y monitoreo</li><li>Soporte y ajustes</li><li>Medición del ahorro</li><li>Mejoras menores</li></ul>
+        </div>
+        <a class="tier-cta" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">Escríbenos por WhatsApp</a>
+      </li>
+    </ol>
+    <p class="body prices-note" data-uf-note="Precios más IVA. UF del {date}: {uf} (SII). ¿Prefieres pagar por resultado? Un precio fijo menor más un 10 % a 20 % del ahorro medido en el primer año, contra la línea base firmada.">Precios más IVA. UF del 29 de octubre de 2026: $ 41.237,01 (SII). ¿Prefieres pagar por resultado? Un precio fijo menor más un 10 % a 20 % del ahorro medido en el primer año, contra la línea base firmada.</p>
+  </section>
+
+  <section class="team" id="equipo" aria-labelledby="team-h">
+    <span class="way w-t1" data-mark aria-hidden="true"></span><span class="way w-t2" data-mark aria-hidden="true"></span>
+    <h2 class="head" id="team-h"><span class="ln"><span>Tres ingenieros,</span></span> <span class="ln"><span>en Santiago.</span></span></h2>
+    <article class="letter">
+      <div class="faces" aria-hidden="true"><span class="face face-1">MM</span><span class="face face-2">JL</span><span class="face face-3">TE</span></div>
+      <p>Somos Matías, Juan Pedro y Tomás. Estudiamos matemáticas e ingeniería en la UC y en la Universidad de los Andes, y llevamos años trabajando en optimización, aprendizaje automático y simulación.</p>
+      <p>En las pymes vemos siempre lo mismo: la operación vive en planillas, los pedidos llegan por WhatsApp y nadie tiene tiempo de calcular cuánto cuesta hacerlo así. Las herramientas para calcularlo existen hace décadas; las usan las empresas grandes.</p>
+      <p>argmin existe para llevarlas a empresas como la tuya, con una regla: todo se mide en pesos, contra una línea base que firmas tú.</p>
+      <p>No vendemos licencias ni chatbots. Usamos solvers abiertos, nos conectamos con lo que ya usas (Bsale, Defontana, Nubox, Buk, el SII, tus planillas) y te dejamos una herramienta que tu equipo entiende.</p>
+      <p>La primera conversación dura 30 minutos y no cuesta nada.</p>
+      <p class="sign"><span>Matías Morgado</span><span>Juan Pedro Lira</span><span>Tomás Erdmannsdörffer</span></p>
+    </article>
+  </section>
+
+  <section class="faq" id="preguntas" aria-labelledby="faq-h">
+    <span class="way w-f1" data-mark aria-hidden="true"></span>
+    <h2 class="head" id="faq-h"><span class="ln"><span>Preguntas.</span></span></h2>
+    <div class="cards">
+      <div class="card card-1 is-open">
+        <h3 class="card-h"><button class="card-btn" type="button" id="q-0-btn" aria-expanded="true" aria-controls="q-0"><span class="tab">Privacidad</span><span class="q">¿Qué pasa con los datos de mi empresa?</span></button></h3>
+        <div class="card-a" id="q-0" role="region" aria-labelledby="q-0-btn"><div class="card-a-in"><p class="body">Los tratamos como encargados: contrato de encargo de tratamiento, cifrado, gestor de secretos, registro de accesos y el mínimo acceso necesario. Las claves, como la del SII, solo con autorización escrita.</p></div></div>
+      </div>
+      <div class="card card-2">
+        <h3 class="card-h"><button class="card-btn" type="button" id="q-1-btn" aria-expanded="false" aria-controls="q-1"><span class="tab">Sin datos</span><span class="q">¿Y si no tengo datos ordenados?</span></button></h3>
+        <div class="card-a" id="q-1" role="region" aria-labelledby="q-1-btn"><div class="card-a-in"><p class="body">Es lo más común. Si emites factura electrónica, ya tienes lo que vendes y lo que compras, producto por producto. Partimos de ahí y armamos contigo la forma de registrar lo que falta. El diagnóstico te dice qué datos hacen falta.</p></div></div>
+      </div>
+      <div class="card card-3">
+        <h3 class="card-h"><button class="card-btn" type="button" id="q-2-btn" aria-expanded="false" aria-controls="q-2"><span class="tab">Sistemas</span><span class="q">¿Tengo que cambiar mi ERP o mis planillas?</span></button></h3>
+        <div class="card-a" id="q-2" role="region" aria-labelledby="q-2-btn"><div class="card-a-in"><p class="body">No. Nos conectamos con lo que ya usas: documentos tributarios y Registro de Compras y Ventas del SII, tu ERP (Bsale, Defontana, Nubox, Buk u otro), cartolas bancarias, planillas y WhatsApp Business.</p></div></div>
+      </div>
+      <div class="card card-1">
+        <h3 class="card-h"><button class="card-btn" type="button" id="q-3-btn" aria-expanded="false" aria-controls="q-3"><span class="tab">Ahorro</span><span class="q">¿Cómo miden el ahorro?</span></button></h3>
+        <div class="card-a" id="q-3" role="region" aria-labelledby="q-3-btn"><div class="card-a-in"><p class="body">Antes de empezar firmamos una línea base con números de tu operación: capital en bodega, quiebres de stock, horas hombre o kilómetros. Al cerrar medimos los mismos números con el mismo método. La diferencia es el ahorro.</p></div></div>
+      </div>
+      <div class="card card-2">
+        <h3 class="card-h"><button class="card-btn" type="button" id="q-4-btn" aria-expanded="false" aria-controls="q-4"><span class="tab">Pago</span><span class="q">¿Y si no confío en el ahorro estimado?</span></button></h3>
+        <div class="card-a" id="q-4" role="region" aria-labelledby="q-4-btn"><div class="card-a-in"><p class="body">Puedes pagar por resultado: un precio fijo menor más un 10 % a 20 % del ahorro medido durante el primer año.</p></div></div>
+      </div>
+      <div class="card card-3">
+        <h3 class="card-h"><button class="card-btn" type="button" id="q-5-btn" aria-expanded="false" aria-controls="q-5"><span class="tab">IA</span><span class="q">¿Usan inteligencia artificial?</span></button></h3>
+        <div class="card-a" id="q-5" role="region" aria-labelledby="q-5-btn"><div class="card-a-in"><p class="body">Donde sirve: para leer facturas, órdenes y correos, siempre con revisión humana. Las decisiones (cuánto comprar, qué ruta, qué turno) las toma un modelo matemático que puedes revisar.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contacto" aria-labelledby="contact-h">
+    <span class="way w-k1" data-mark aria-hidden="true"></span>
+    <div class="contact-top">
+      <h2 class="head" id="contact-h"><span class="ln"><span>Hablemos.</span></span></h2>
+      <div class="prop prop-office"><span class="way w-k2" data-mark aria-hidden="true"></span><img src="/assets/3d/office.webp" width="543" height="487" alt="" loading="lazy" decoding="async"><span class="pin s-destino cap-left" data-mark data-park="end" data-face="8" aria-hidden="true"><span class="pin-cap">Llegó. Ahora, hablemos.</span></span></div>
+    </div>
+    <ul class="rows">
+      <li><a class="row" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">WhatsApp</a></li>
+      <li><a class="row" href="mailto:hola@argmin.cl?subject=Agendar%2030%C2%A0minutos%20con%20argmin">Agenda 30 minutos</a></li>
+      <li class="row-wrap">
+        <button class="row" type="button" id="form-btn" aria-expanded="true" aria-controls="form-panel">Escríbenos aquí</button>
+        <div class="form-panel" id="form-panel">
+          <form class="form" action="/api/contacto" method="post" data-form data-lang="es"
+                data-sending="Enviando…" data-ok="Recibido. Te escribimos pronto."
+                data-error="No pudimos enviarlo. Escríbenos a hola@argmin.cl." data-off="El formulario todavía no está conectado. Escríbenos a hola@argmin.cl."
+                data-missing="Falta tu nombre, cómo contactarte o qué quieres resolver.">
+            <div class="f"><label for="f-name">Nombre</label><input id="f-name" name="nombre" autocomplete="name" required></div>
+            <div class="f"><label for="f-company">Empresa</label><input id="f-company" name="empresa" autocomplete="organization"></div>
+            <div class="f"><label for="f-contact">Correo o teléfono</label><input id="f-contact" name="contacto" autocomplete="email" spellcheck="false" required></div>
+            <div class="f f-wide"><label for="f-msg">¿Qué quieres resolver?</label><textarea id="f-msg" name="mensaje" rows="4" required></textarea></div>
+            <div class="hp" aria-hidden="true"><label for="f-web">Web</label><input id="f-web" name="website" tabindex="-1" autocomplete="off"></div>
+            <div class="form-end">
+              <button class="submit" type="submit">Enviar</button>
+              <p class="small">Usamos tus datos solo para responderte.</p>
+            </div>
+            <p class="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </li>
+    </ul>
+  </section>
+</main>
+
+<footer class="end">
+  <div class="end-top">
+    <p>argmin, Santiago de Chile.<br>Optimización y automatización para pymes.</p>
+    <a class="link" href="#top">Volver arriba</a>
+  </div>
+  <p class="end-mail" translate="no"><a href="mailto:hola@argmin.cl">hola@<wbr>argmin.cl</a></p>
+  <div class="end-meta">
+    <a href="/en/" hreflang="en" lang="en">English</a>
+    <p class="credits">Dibujos a partir de fotos: <a href="https://commons.wikimedia.org/wiki/File:Pallereoler_i_Remise_3_01.jpg">“Pallereoler i Remise 3 01”</a> de Leif Jørgensen (<a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>); <a href="https://commons.wikimedia.org/wiki/File:Campbell_con_Meiggs,_Barrio_Meiggs,_Santiago_20200204_09.jpg">“Campbell con Meiggs, Barrio Meiggs, Santiago 20200204 09”</a> de Carlos Figueroa (<a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>); <a href="https://commons.wikimedia.org/wiki/File:La_Vega_Central_en_Santiago.jpg">“La Vega Central en Santiago”</a> de Mx. Granger (<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>); <a href="https://commons.wikimedia.org/wiki/File:Ruta_5_Norte(Chile)_vistaaerea.jpg">“Ruta 5 Norte(Chile) vistaaerea”</a> de Ivotoledo45 (<a href="https://creativecommons.org/licenses/by-sa/4.0">CC BY-SA 4.0</a>); <a href="https://commons.wikimedia.org/wiki/File:Puerto_San_Antonio_-_13022826444.jpg">“Puerto San Antonio - 13022826444”</a> de Sebastián Betancourt (<a href="https://creativecommons.org/licenses/by/2.0">CC BY 2.0</a>), vía Wikimedia Commons. Los dibujos se comparten bajo CC BY-SA 4.0. Mapa: © colaboradores de OpenStreetMap (ODbL).</p>
+    <p>Santiago, 2026</p>
+  </div>
+</footer>
+<div class="story" aria-hidden="true">
+  <svg class="story-svg" focusable="false"><path class="road-rim"/><path class="road-plan"/><path class="road-case"/><path class="road-done"/></svg>
+  <div class="truck"></div>
+</div>
+</body>
+</html>
