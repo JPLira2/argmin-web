@@ -1,5 +1,5 @@
-/* The found photographs the drawings are made from, as credited in the footer. Originals and the
-   download record are in draft/originals; tools/drawings.py makes the drawings. */
+/* The found photographs on the page, as credited in the footer. Originals and the download record are
+   in draft/originals; tools/photos.py makes the web copies (cropped, in greyscale) under the same names. */
 export default [
   { file: 'shelves', title: 'Pallereoler i Remise 3 01', author: 'Leif Jørgensen', licence: 'CC BY-SA 4.0',
     licenceUrl: 'https://creativecommons.org/licenses/by-sa/4.0', page: 'https://commons.wikimedia.org/wiki/File:Pallereoler_i_Remise_3_01.jpg' },

@@ -1,0 +1,421 @@
+{
+ "schemaVersion": 2,
+ "generatedAt": "2026-11-03T02:30:23+00:00",
+ "title": "Design System: argmin",
+ "extensions": {
+  "colorMeta": {
+   "paper": {
+    "role": "neutral",
+    "displayName": "Paper",
+    "canonical": "oklch(97.5% 0.004 121.6)",
+    "tonalRamp": [
+     "#0b0b0a",
+     "#252524",
+     "#424240",
+     "#61615f",
+     "#828380",
+     "#a4a5a3",
+     "#c9c9c7",
+     "#eeefed"
+    ]
+   },
+   "paper-2": {
+    "role": "neutral",
+    "displayName": "Paper step",
+    "canonical": "oklch(93.7% 0.007 124.5)",
+    "tonalRamp": [
+     "#0b0b0a",
+     "#242523",
+     "#41423f",
+     "#60625e",
+     "#81837f",
+     "#a4a6a2",
+     "#c8cac6",
+     "#eeefec"
+    ]
+   },
+   "ink": {
+    "role": "neutral",
+    "displayName": "Ink",
+    "canonical": "oklch(18.4% 0.005 145.4)",
+    "tonalRamp": [
+     "#0a0b0a",
+     "#242524",
+     "#414341",
+     "#60625f",
+     "#818380",
+     "#a3a6a3",
+     "#c8cac8",
+     "#edefed"
+    ]
+   },
+   "ink-2": {
+    "role": "neutral",
+    "displayName": "Ink soft",
+    "canonical": "oklch(36.1% 0.011 145.3)",
+    "tonalRamp": [
+     "#0a0c0a",
+     "#232623",
+     "#3f433f",
+     "#5e635e",
+     "#7f847f",
+     "#a2a6a2",
+     "#c6cac6",
+     "#ecf0ec"
+    ]
+   },
+   "navy": {
+    "role": "secondary",
+    "displayName": "Workwear navy",
+    "canonical": "oklch(28.7% 0.057 262.6)",
+    "tonalRamp": [
+     "#050b19",
+     "#1b2538",
+     "#35425b",
+     "#516180",
+     "#7183a3",
+     "#96a6c3",
+     "#bccae4",
+     "#e3efff"
+    ]
+   },
+   "navy-2": {
+    "role": "secondary",
+    "displayName": "Navy deep",
+    "canonical": "oklch(24.1% 0.047 262.5)",
+    "tonalRamp": [
+     "#060b16",
+     "#1c2535",
+     "#374257",
+     "#54627b",
+     "#74839e",
+     "#98a6be",
+     "#becadf",
+     "#e5efff"
+    ]
+   },
+   "navy-3": {
+    "role": "secondary",
+    "displayName": "Navy step",
+    "canonical": "oklch(35.1% 0.071 262.3)",
+    "tonalRamp": [
+     "#030a1c",
+     "#18253d",
+     "#314261",
+     "#4c6188",
+     "#6d83ab",
+     "#92a6ca",
+     "#b8caea",
+     "#e0efff"
+    ]
+   },
+   "sheet": {
+    "role": "neutral",
+    "displayName": "Sheet",
+    "canonical": "oklch(100.0% 0.000 89.9)",
+    "tonalRamp": [
+     "#0b0b0b",
+     "#252525",
+     "#414141",
+     "#606060",
+     "#808080",
+     "#a3a3a3",
+     "#c6c6c6",
+     "#ebebeb"
+    ]
+   },
+   "navy-4": {
+    "role": "secondary",
+    "displayName": "Navy line",
+    "canonical": "oklch(43.2% 0.085 260.3)",
+    "tonalRamp": [
+     "#000825",
+     "#09224d",
+     "#25406e",
+     "#436090",
+     "#6381b4",
+     "#84a4d9",
+     "#a7c8fe",
+     "#e1ecfe"
+    ]
+   },
+   "navy-note": {
+    "role": "secondary",
+    "displayName": "Navy note",
+    "canonical": "oklch(79.7% 0.016 260.7)",
+    "tonalRamp": [
+     "#080b12",
+     "#20252c",
+     "#3d414a",
+     "#5b6069",
+     "#7b818a",
+     "#9da3ad",
+     "#c1c7d1",
+     "#e5ecf6"
+    ]
+   },
+   "turquoise": {
+    "role": "primary",
+    "displayName": "Turquoise",
+    "canonical": "oklch(77.9% 0.136 180.4)",
+    "tonalRamp": [
+     "#000f0c",
+     "#022c26",
+     "#004d43",
+     "#027062",
+     "#059583",
+     "#0bbca6",
+     "#3fe3ca",
+     "#a9ffee"
+    ]
+   },
+   "turquoise-lit": {
+    "role": "primary",
+    "displayName": "Turquoise lit",
+    "canonical": "oklch(80.9% 0.132 182.0)",
+    "tonalRamp": [
+     "#000f0c",
+     "#022c26",
+     "#044c44",
+     "#007064",
+     "#019585",
+     "#04bca9",
+     "#46e2cd",
+     "#a7ffef"
+    ]
+   },
+   "turquoise-deep": {
+    "role": "primary",
+    "displayName": "Turquoise deep",
+    "canonical": "oklch(56.6% 0.101 182.5)",
+    "tonalRamp": [
+     "#000f0c",
+     "#002c27",
+     "#004d44",
+     "#017064",
+     "#1d9486",
+     "#4cb7a8",
+     "#73dccc",
+     "#a7fff0"
+    ]
+   }
+  },
+  "typographyMeta": {
+   "giant": {
+    "displayName": "Giant",
+    "purpose": "The calculator's figure and the footer's address."
+   },
+   "mega": {
+    "displayName": "Mega",
+    "purpose": "The first screen headline, the contact heading, the route figures."
+   },
+   "head": {
+    "displayName": "Head",
+    "purpose": "Section headings and the contact rows."
+   },
+   "state": {
+    "displayName": "Statement",
+    "purpose": "Supporting sentences, service names, the pricing rule, the calculator's sentence."
+   },
+   "body": {
+    "displayName": "Body",
+    "purpose": "Running text, 58 characters a line at most."
+   },
+   "small": {
+    "displayName": "Small",
+    "purpose": "Captions, keys, controls, credits; never under 13 px."
+   }
+  },
+  "shadows": [
+   {
+    "name": "lift-1",
+    "value": "0 1px 2px rgb(19 31 54 / .07), 1px 6px 14px -6px rgb(19 31 54 / .2)",
+    "purpose": "Sheets at rest: closed steps, questions."
+   },
+   {
+    "name": "lift-2",
+    "value": "0 2px 4px rgb(19 31 54 / .08), 3px 18px 36px -14px rgb(19 31 54 / .34)",
+    "purpose": "Raised sheets: the letter, the photographs, open and hovered states."
+   },
+   {
+    "name": "lift-3",
+    "value": "0 4px 10px rgb(19 31 54 / .1), 6px 40px 80px -30px rgb(19 31 54 / .55)",
+    "purpose": "Plates and the map sheet."
+   },
+   {
+    "name": "edge",
+    "value": "inset 0 1px 0 rgb(255 255 255 / .08)",
+    "purpose": "A dark plate's lit top edge."
+   },
+   {
+    "name": "well",
+    "value": "inset 2px 3px 12px rgb(0 0 0 / .5), inset 0 -1px 0 rgb(255 255 255 / .06)",
+    "purpose": "The well sunk into the hero plate, where the scenes play."
+   }
+  ],
+  "motion": [
+   {
+    "name": "ease",
+    "value": "cubic-bezier(.22, 1, .36, 1)",
+    "purpose": "Every arrival: marks, menus, rises, unfolding panels."
+   },
+   {
+    "name": "exit",
+    "value": "cubic-bezier(.4, 0, 1, 1)",
+    "purpose": "The menu leaving, faster than it arrived (0.2 s against 0.32 s)."
+   },
+   {
+    "name": "feedback",
+    "value": "160ms",
+    "purpose": "Hover colour on buttons, links and rows."
+   },
+   {
+    "name": "press",
+    "value": "100ms",
+    "purpose": "Buttons and rows scale to 0.97 under the finger."
+   },
+   {
+    "name": "scene-in",
+    "value": "720ms",
+    "purpose": "Marks arriving at a scene as it stands today (20 ms stagger, 340 ms at most)."
+   },
+   {
+    "name": "scene-resolve",
+    "value": "860ms",
+    "purpose": "Marks moving to the model's plan."
+   },
+   {
+    "name": "rise",
+    "value": "700ms",
+    "purpose": "Heading lines rising out of their mask once, as the section arrives."
+   },
+   {
+    "name": "sink",
+    "value": "scroll-linked: to perspective(1600px) rotateX(8deg) scale(.93), brightness .78",
+    "purpose": "The hero plate sinking back as you leave it, where the browser ties animation to the scroll."
+   },
+   {
+    "name": "arrive",
+    "value": "scroll-linked: from perspective(1600px) rotateX(-7deg) translateY(48px) scale(.97)",
+    "purpose": "A plate tipping up into place as it arrives."
+   }
+  ],
+  "breakpoints": [
+   {
+    "name": "menu",
+    "value": "1179px"
+   },
+   {
+    "name": "one-column",
+    "value": "899px"
+   },
+   {
+    "name": "phone",
+    "value": "599px"
+   },
+   {
+    "name": "smallest",
+    "value": "359px"
+   }
+  ]
+ },
+ "components": [
+  {
+   "name": "Primary Button",
+   "kind": "button",
+   "refersTo": "button-primary",
+   "description": "The one action: \"Agenda 30 minutos\", the pilot, the hero.",
+   "html": "<a class=\"ds-btn\" href=\"#\">Agenda 30 minutos</a>",
+   "css": ".ds-btn { display: inline-flex; align-items: center; height: 48px; padding: 0 22px; border-radius: 6px; background: #22d3bb; color: #111311; font: 600 14px/1 'Sofia Sans', system-ui, sans-serif; letter-spacing: .01em; text-decoration: none; transition: background-color .16s cubic-bezier(.22,1,.36,1), transform .1s cubic-bezier(.22,1,.36,1); } .ds-btn:hover { background: #3ddcc7; } .ds-btn:active { transform: scale(.97); } .ds-btn:focus-visible { outline: 3px solid #00897b; outline-offset: 3px; }"
+  },
+  {
+   "name": "Ink Button",
+   "kind": "button",
+   "refersTo": "button-ink",
+   "description": "The action on the turquoise plate.",
+   "html": "<a class=\"ds-btn-ink\" href=\"#\">Pide el diagnóstico con estos números</a>",
+   "css": ".ds-btn-ink { display: inline-flex; align-items: center; height: 48px; padding: 0 22px; border-radius: 6px; background: #111311; color: #f6f7f4; font: 600 14px/1 'Sofia Sans', system-ui, sans-serif; text-decoration: none; transition: background-color .16s; } .ds-btn-ink:hover { background: #1b2a47; } .ds-btn-ink:active { transform: scale(.97); } .ds-btn-ink:focus-visible { outline: 3px solid #111311; outline-offset: 3px; }"
+  },
+  {
+   "name": "Stage controls",
+   "kind": "nav",
+   "refersTo": "stage-tab",
+   "description": "Scene buttons and the pause, along the top of the well sunk into the hero plate.",
+   "html": "<div class=\"ds-stage\"><button class=\"ds-tab\" aria-pressed=\"true\">Rutas</button><button class=\"ds-tab\" aria-pressed=\"false\">Stock</button><button class=\"ds-tab\" aria-pressed=\"false\">Turnos</button><button class=\"ds-pause\">Pausar</button></div>",
+   "css": ".ds-stage { display: flex; align-items: center; padding: 16px; border-radius: 10px; background: #131f36; color: #f6f7f4; box-shadow: inset 2px 3px 12px rgb(0 0 0 / .5), inset 0 -1px 0 rgb(255 255 255 / .06); } .ds-tab, .ds-pause { height: 40px; padding: 0 14px; border: 0; border-radius: 6px; background: transparent; color: inherit; font: 600 14px/1 'Sofia Sans', system-ui, sans-serif; cursor: pointer; } .ds-tab[aria-pressed='true'] { background: #f6f7f4; color: #111311; } .ds-tab[aria-pressed='false']:hover { background: #263a60; } .ds-pause { margin-left: 10px; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: .25em; }"
+  },
+  {
+   "name": "Calculator input",
+   "kind": "input",
+   "refersTo": "calc-input",
+   "description": "A number set inside the sentence, on the turquoise plate.",
+   "html": "<p class=\"ds-calc\">Tengo $ <input class=\"ds-num\" value=\"80.000.000\" size=\"10\"> en inventario.</p>",
+   "css": ".ds-calc { margin: 0; padding: 24px; border-radius: 16px; background: radial-gradient(120% 100% at 0% 0%, #5be7d4, #22d3bb 46%, #18b9a3); color: #111311; font: 500 28px/1.5 'Sofia Sans', system-ui, sans-serif; box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), 0 4px 10px rgb(0 105 92 / .14), 6px 44px 80px -30px rgb(0 105 92 / .55); } .ds-num { font: inherit; font-weight: 600; color: #111311; background: #f6f7f4; border: 0; border-bottom: 4px solid #111311; border-radius: 4px 4px 0 0; padding: 0 .22em; box-shadow: 0 1px 2px rgb(0 60 52 / .2); } .ds-num:hover { background: #fff; } .ds-num:focus-visible { outline: 3px solid #111311; outline-offset: 2px; }"
+  },
+  {
+   "name": "Contact row",
+   "kind": "custom",
+   "refersTo": "contact-row",
+   "description": "A way to talk, set in display type: a tray stacked over the one above, on the navy plate.",
+   "html": "<a class=\"ds-row\" href=\"#\"><span>Agenda 30 minutos</span></a>",
+   "css": ".ds-row { position: relative; display: flex; align-items: flex-end; min-height: 112px; padding: 0 28px 22px; border-radius: 16px 16px 0 0; background: #131f36; color: #f6f7f4; box-shadow: 0 -12px 26px -16px rgb(0 0 0 / .65), inset 0 1px 0 rgb(255 255 255 / .08); font: 900 64px/.96 'Sofia Sans Extra Condensed', 'Arial Narrow', sans-serif; text-transform: uppercase; text-decoration: none; transition: background-color .2s; } .ds-row span { transition: transform .25s cubic-bezier(.22,1,.36,1); } .ds-row:hover { background: #314a78; } .ds-row:hover span { transform: translateX(14px); } .ds-row:focus-visible { outline: 3px solid #3ddcc7; outline-offset: -8px; }"
+  },
+  {
+   "name": "Question",
+   "kind": "custom",
+   "refersTo": "",
+   "description": "A question on a white sheet that opens in place; the open one is a navy plate.",
+   "html": "<div class=\"ds-q\"><button class=\"ds-q-btn\" aria-expanded=\"false\">¿Cómo miden el ahorro?</button></div>",
+   "css": ".ds-q { border-radius: 10px; background: #fff; box-shadow: 0 1px 2px rgb(19 31 54 / .07), 1px 6px 14px -6px rgb(19 31 54 / .2); transition: box-shadow .2s linear; } .ds-q-btn { position: relative; display: block; width: 100%; padding: 20px 64px 20px 24px; border: 0; background: none; color: #111311; text-align: left; font: 600 18px/1.35 'Sofia Sans', system-ui, sans-serif; cursor: pointer; } .ds-q-btn::before, .ds-q-btn::after { content: ''; position: absolute; right: 26px; top: 50%; width: 16px; height: 2px; background: currentColor; } .ds-q-btn::after { transform: rotate(90deg); } .ds-q:hover { box-shadow: 0 2px 4px rgb(19 31 54 / .08), 3px 18px 36px -14px rgb(19 31 54 / .34); } .ds-q-btn:focus-visible { outline: 3px solid currentColor; outline-offset: -6px; }"
+  }
+ ],
+ "narrative": {
+  "northStar": "Your data, rearranged to the minimum",
+  "overview": "argmin's site is a desk seen from above. Paper is the ground, and everything with a colour is an object lying\non it: navy plates for the first screen, the tools and the contact, one turquoise plate for the calculator,\nwhite sheets for the map, the tool fragments, the questions and the founders' letter. Where two sections meet,\nsomething crosses the edge, so nothing reads as a slide: the shelves photograph hangs over the calculator's\ntop, the map sheet lies across the foot of the highway photograph, the contact trays stack and rest on the\nfooter. The signature is the stage: the same 18 small blocks (orders, products, shifts) move from the plan a\npyme has today, with what it loses in turquoise, to the plan a model finds. Turquoise has one meaning across\nthe whole site, what is lost, and it also marks the one action that matters, so the colour is both the\nproblem and the way out.\n\nThe page proves instead of claiming. The route solve and the stock calculator run in the browser on the\nvisitor's screen, and the product appears as real fragments of its tools with example data, labelled as\nsuch. Photographs are documentary and greyscale, one treatment for every picture.\n\nThe house lint's flat rules (no shadows or gradients at rest) are overridden here on purpose: the founders\nasked for depth on 2 November 2026, after the flat version read like slides. Every shadow and gradient below\nbelongs to the depth system; none is decoration.\n\n- A paper desk with objects on it: navy plates (first screen, tools, contact), one turquoise plate (the calculator), white sheets. Never colour fields meeting edge to edge.\n- One light, from the upper left. Plates are lit at the top left and cast navy shadows down and a little right; sheets lie at one of three heights.\n- The navy plates carry gradient descent, the page's only texture: the level sets of an irregular cost surface and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand. It fades out towards the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting star draws, its steps lighting as the star passes: one every 6 s as the day begins, and as the next sets off the last one's track is wiped, so one run shows at a time and the last one stays. The lowest point, a small ring, sits in the clear between the offer and the scene's well, at every size.\n- The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.\n- Display type is one ink, uppercase, never with an accented word.\n- Motion explains a state change. Where the browser ties animation to the scroll, the hero sinks back as you leave it, each plate tips up into place within its first few hundred pixels on screen, and the tools' sheets settle flat as you reach them; never under reduced motion. The stars fly once, pause with the day's pause button and while the hero is off screen.",
+  "keyCharacteristics": [
+   "A paper desk with objects on it: navy plates (first screen, tools, contact), one turquoise plate (the calculator), white sheets. Never colour fields meeting edge to edge.",
+   "One light, from the upper left. Plates are lit at the top left and cast navy shadows down and a little right; sheets lie at one of three heights.",
+   "The navy plates carry gradient descent, the page's only texture: the level sets of an irregular cost surface and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand. It fades out towards the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting star draws, its steps lighting as the star passes: one every 6 s as the day begins, and as the next sets off the last one's track is wiped, so one run shows at a time and the last one stays. The lowest point, a small ring, sits in the clear between the offer and the scene's well, at every size.",
+   "The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.",
+   "Display type is one ink, uppercase, never with an accented word.",
+   "Motion explains a state change. Where the browser ties animation to the scroll, the hero sinks back as you leave it, each plate tips up into place within its first few hundred pixels on screen, and the tools' sheets settle flat as you reach them; never under reduced motion. The stars fly once, pause with the day's pause button and while the hero is off screen."
+  ],
+  "rules": [
+   {
+    "name": "The Turquoise Means Waste Rule",
+    "body": "Turquoise marks what is lost, in every figure, and the primary action; it never decorates a heading, a link or an icon. On paper it is always the deep turquoise; the bright one only on navy, and as a fill with ink on it.",
+    "section": "colors"
+   },
+   {
+    "name": "The One Turquoise Plate Rule",
+    "body": "One section per page takes the turquoise plate: the calculator.",
+    "section": "colors"
+   },
+   {
+    "name": "The Two Lines Rule",
+    "body": "Every heading fits in two lines at every width; break where the copy's arrays break.",
+    "section": "typography"
+   },
+   {
+    "name": "The One Ink Rule",
+    "body": "A headline is one colour and one weight. Emphasis comes from size, never from a coloured or italic word.",
+    "section": "typography"
+   }
+  ],
+  "dos": [
+   "**Do** use turquoise only for what is lost and for the primary action, and the deep turquoise on paper.",
+   "**Do** let something cross where two sections meet: a sheet over a photograph, a photograph over a plate.",
+   "**Do** show the mechanism with real or labelled example data: a solve, a calculation, a tool fragment.",
+   "**Do** keep every picture greyscale and credited in the footer.",
+   "**Do** keep content visible without script: stages are drawn by the build at rest."
+  ],
+  "donts": [
+   "**Don't** lay colour fields edge to edge or stack bands of paper: the page is a desk with objects, not slides.",
+   "**Don't** put shadows or glows on buttons, or a border under a shadow; no glass, no blur, no generated noise. The only texture is the descent.",
+   "**Don't** use the bright turquoise on paper for text, lines or marks (1.8:1).",
+   "**Don't** let the texture sit behind a title: it fades out towards the left of every plate (and the top, on phones, where the headline runs the width).",
+   "**Don't** invent proof: no clients, logos, testimonials or results until they are real.",
+   "**Don't** bring back the page-long truck: it appears in the hero's route scene and the route solve only."
+  ]
+ }
+}
