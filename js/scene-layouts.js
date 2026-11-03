@@ -181,16 +181,28 @@ function minimo(box, m) {
   const top = y0 + m * 0.6, bottom = y1 - 2;
   const at = u => [x0 + u * cw, bottom - cost(u) * (bottom - top)];
   const d = Array.from({ length: 65 }, (_, i) => at(i / 64)).map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join('');
-  const lift = m / 2 + 4;
+  const lift = m / 2 + 4, ui = i => 0.05 + 0.9 * i / (N - 1);
+  const s = Math.min(1, cw * 0.9 / (N - 1) / (m * 1.15));   // on a narrow stage, small enough not to touch along the curve
   const before = Array.from({ length: N }, (_, i) => {
-    const u = 0.05 + 0.9 * i / (N - 1), [x, y] = at(u);
-    return mk([x, y - lift], cost(u) > 0.3);
+    const [x, y] = at(ui(i));
+    return mk([x, y - lift], cost(ui(i)) > 0.3, 0, s);
   });
-  const [mx] = at(u0), after = [];
+  // the pile at the foot, 6, 5, 4 and 3 high: the marks nearest the foot make its bottom row, the next ones the
+  // row above, and so on, each row in the marks' own order across, so the pile is built from the bottom up
+  const [mx] = at(u0), after = [], near = [...Array(N).keys()].sort((a, b) => Math.abs(ui(a) - u0) - Math.abs(ui(b) - u0));
+  let k = 0;
   [6, 5, 4, 3].forEach((n, row) => {
-    for (let j = 0; j < n; j++) after.push(mk([mx + (j - (n - 1) / 2) * step, bottom - lift - row * step]));
+    near.slice(k, k + n).sort((a, b) => a - b)
+      .forEach((i, j) => { after[i] = mk([mx + (j - (n - 1) / 2) * step, bottom - lift - row * step]); });
+    k += n;
   });
-  return { before, after, fx: [{ k: 'curve', d, phase: 'both' }] };
+  // on the way there (the page only): every mark slides down the curve together, keeping its order, to lie side
+  // by side at the foot, a step apart; then the pile is stacked. Only where the row fits on the curve
+  const i0 = (u0 - 0.05) / 0.9 * (N - 1), v = i => u0 + (i - i0) * step / cw;
+  const fits = v(0) > 0.02 && v(N - 1) < 0.98;
+  const slide = (i, e) => { const [x, y] = at(ui(i) + (v(i) - ui(i)) * e); return [x, y - lift]; };
+  const via = fits ? before.map((_, i) => mk(slide(i, 1))) : undefined;
+  return { before, after, via, slide, fx: [{ k: 'curve', d, phase: 'both' }] };
 }
 
 /* The scene for a stage: its marks before and after, its furniture, and (for routes) the road the truck
@@ -200,7 +212,9 @@ export function layout(name, box, ctx = {}, labels = {}) {
   const scene = { rutas: () => rutas(box, m, ctx), stock: () => stock(box, m), turnos: () => turnos(box, m, labels.turnos),
     compras: () => compras(box, m, labels.compras), pronostico: () => pronostico(box, m, labels.pronostico),
     produccion: () => produccion(box, m, labels.produccion), minimo: () => minimo(box, m) }[name] || (() => minimo(box, m));
-  return { m, ...scene() };
+  // stack: the scene stands blocks on top of one another (a block is lifted up over others); otherwise it is a
+  // plan seen from above (a block is lifted towards the eye and passes over)
+  return { m, stack: !['rutas', 'compras', 'pronostico', 'produccion'].includes(name), ...scene() };
 }
 
 /* A mark is a small block seen from above and to the right, lit from the upper left: its face, the top the

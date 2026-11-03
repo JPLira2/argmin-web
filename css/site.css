@@ -344,6 +344,7 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
 .route { fill: none; stroke: var(--a-deep); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; transition: stroke .45s ease, opacity .3s ease; }
 .route.is-model { stroke: var(--b); }
 .route.is-ghost { stroke: var(--a-deep); stroke-width: 3; opacity: .7; }
+.route.is-trace { stroke-width: 3; transition: none; }   /* the plan the search just left, fading */
 .map-plan .stop { fill: var(--ink); stroke: var(--sheet); stroke-width: 2.5; }
 .depot { fill: var(--ink); stroke: var(--sheet); stroke-width: 3; }
 .map-truck { position: absolute; left: 0; top: 0; width: 64px; height: 53px; opacity: 0; visibility: hidden; pointer-events: none; will-change: transform;
