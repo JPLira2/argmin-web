@@ -52,7 +52,10 @@
   --lift-2: 0 2px 4px rgb(19 31 54 / .08), 3px 18px 36px -14px rgb(19 31 54 / .34);
   --lift-3: 0 4px 10px rgb(19 31 54 / .1), 6px 40px 80px -30px rgb(19 31 54 / .55);
   --edge: inset 0 1px 0 rgb(255 255 255 / .08);                                 /* a plate's lit top edge */
-  --lit: radial-gradient(90% 70% at 12% 0%, rgb(255 255 255 / .07), transparent 70%);   /* the light on a plate */
+  --lit: radial-gradient(90% 70% at 12% 0%, rgb(255 255 255 / 0.075) 0%, rgb(255 255 255 / 0.072) 12%, rgb(255 255 255 / 0.064) 25%, rgb(255 255 255 / 0.052) 38%, rgb(255 255 255 / 0.037) 50%, rgb(255 255 255 / 0.023) 62%, rgb(255 255 255 / 0.011) 75%, rgb(255 255 255 / 0.003) 88%, rgb(255 255 255 / 0.000) 100%);   /* the light on a plate */
+  /* the dither under every plate's light: blue noise around mid-grey (tools/grain.py), laid on with soft-light so
+     the 8-bit steps of a wide gradient dissolve and its colours stay as they are */
+  --grain: url(../assets/grain.png) 0 0 / 128px 128px;
   --fade: linear-gradient(to right, transparent 56%, #000 80%);   /* the texture keeps clear of the titles on the left */
 
   --display: "Sofia Sans Extra Condensed", "Arial Narrow", sans-serif;
@@ -154,7 +157,8 @@ html:not(.js) .top { position: absolute; }   /* without script it never takes a 
 
 /* ---------- plates: navy, lit from the upper left, with gradient descent drawn faintly across them; the
    drawing fades out towards the left, where the titles are ---------- */
-.hero, .gets, .contact, .menu { position: relative; isolation: isolate; background: var(--lit), var(--b); color: var(--b-ink); }
+.hero, .gets, .contact, .menu { position: relative; isolation: isolate; background: var(--grain), var(--lit), var(--b);
+                                background-blend-mode: soft-light, normal; color: var(--b-ink); }
 .contact::before, .menu::before {
   content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: var(--b-4); opacity: .65;
   -webkit-mask: url(../assets/descent.svg) 84% 42% / cover no-repeat, var(--fade); -webkit-mask-composite: source-in;
@@ -303,7 +307,12 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
 /* ---------- 3. the calculator: the turquoise plate, its photograph hanging over the top edge ---------- */
 .calc { position: relative; display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: var(--s4) 24px; align-items: start;
         margin: var(--sec) var(--inset) 0; padding: var(--sec) var(--pad); border-radius: var(--r);
-        background: radial-gradient(120% 100% at 0% 0%, #5be7d4, var(--a) 46%, #18b9a3); color: var(--a-ink);
+        /* meltwater: the light from the upper left, a glacier-blue cast up on the right and the depth down on the
+           right, each a soft pool on the turquoise, eased so none has an edge, and dithered */
+        background: var(--grain), radial-gradient(ellipse 72% 82% at 4% 0%, rgb(146 244 230 / 0.620) 0%, rgb(146 244 230 / 0.596) 12%, rgb(146 244 230 / 0.529) 25%, rgb(146 244 230 / 0.429) 38%, rgb(146 244 230 / 0.310) 50%, rgb(146 244 230 / 0.191) 62%, rgb(146 244 230 / 0.091) 75%, rgb(146 244 230 / 0.024) 88%, rgb(146 244 230 / 0.000) 100%),
+                    radial-gradient(ellipse 52% 66% at 94% 12%, rgb(62 196 218 / 0.300) 0%, rgb(62 196 218 / 0.289) 12%, rgb(62 196 218 / 0.256) 25%, rgb(62 196 218 / 0.207) 38%, rgb(62 196 218 / 0.150) 50%, rgb(62 196 218 / 0.093) 62%, rgb(62 196 218 / 0.044) 75%, rgb(62 196 218 / 0.011) 88%, rgb(62 196 218 / 0.000) 100%),
+                    radial-gradient(ellipse 86% 96% at 100% 100%, rgb(6 146 129 / 0.780) 0%, rgb(6 146 129 / 0.750) 12%, rgb(6 146 129 / 0.666) 25%, rgb(6 146 129 / 0.539) 38%, rgb(6 146 129 / 0.390) 50%, rgb(6 146 129 / 0.241) 62%, rgb(6 146 129 / 0.114) 75%, rgb(6 146 129 / 0.030) 88%, rgb(6 146 129 / 0.000) 100%), var(--a);
+        background-blend-mode: soft-light, normal, normal, normal; color: var(--a-ink);
         box-shadow: inset 0 1px 0 rgb(255 255 255 / .45), 0 4px 10px rgb(0 105 92 / .14), 6px 44px 80px -30px rgb(0 105 92 / .55); }
 .calc :focus-visible { outline-color: var(--ink); }
 .calc-head { grid-column: 1 / 8; grid-row: 1; }
@@ -367,7 +376,8 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
 
 /* ---------- 5. what the team gets: three sheets held over a navy plate, at three heights ---------- */
 .gets { margin: 0 var(--inset); padding: var(--sec) var(--pad); border-radius: var(--r); box-shadow: var(--edge), var(--lift-3);
-        background: radial-gradient(60% 55% at 62% 78%, rgb(34 211 187 / .1), transparent 72%), var(--lit), var(--b); }
+        background: var(--grain), radial-gradient(60% 55% at 62% 78%, rgb(34 211 187 / 0.110) 0%, rgb(34 211 187 / 0.106) 12%, rgb(34 211 187 / 0.094) 25%, rgb(34 211 187 / 0.076) 38%, rgb(34 211 187 / 0.055) 50%, rgb(34 211 187 / 0.034) 62%, rgb(34 211 187 / 0.016) 75%, rgb(34 211 187 / 0.004) 88%, rgb(34 211 187 / 0.000) 100%), var(--lit), var(--b);
+        background-blend-mode: soft-light, normal, normal; }
 .gets :focus-visible { outline-color: var(--a-lit); }
 .gets-top { row-gap: var(--s3); align-items: end; margin-bottom: var(--head-gap); }
 .gets-top .head { grid-column: 1 / 7; }
@@ -635,7 +645,7 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
   .calc-pic { order: 1; margin: 0; }
   .calc-foot { order: 2; }
 
-  .band-cap { right: var(--pad); left: var(--pad); bottom: var(--pad); }
+  .band-cap { box-sizing: border-box; max-width: calc(100% - 2 * var(--pad)); }
   .map { margin-top: var(--s1); }
   .specs { grid-template-columns: minmax(0, 1fr); gap: var(--s4); margin-top: var(--s4); }
 
@@ -670,6 +680,8 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
   .head { font-size: clamp(36px, 10.4vw, 54px); }
   .hero { --h1: clamp(40px, 12.6vw, 64px); }
   .calc { gap: var(--s3); }
+  .band-img { aspect-ratio: 16 / 9; }
+  .band-cap { box-sizing: border-box; left: 8px; bottom: 8px; max-width: calc(100% - 16px); padding: 5px 9px 6px; border-radius: 4px; font-size: 13px; line-height: 1.3; }
   .descent { -webkit-mask: var(--fade), linear-gradient(transparent 22%, #000 34%); -webkit-mask-composite: source-in;
              mask: var(--fade), linear-gradient(transparent 22%, #000 34%); mask-composite: intersect; }
   .calc, .gets { padding-bottom: var(--s5); }   /* a plate ends close under its last line */

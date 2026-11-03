@@ -232,8 +232,12 @@ little right, and soft:
   `3px 18px 36px -14px`.
 - **Lift 3**, plates and the map: `0 4px 10px` and `6px 40px 80px -30px`.
 
-Plates add a lit top edge (a 1 px inset highlight) and a soft light from the upper left; the turquoise plate is
-modelled from a lighter top left to a deeper bottom right. Wells and trays are sunk: an inset shadow, no
+Plates add a lit top edge (a 1 px inset highlight) and a soft light from the upper left. The turquoise plate is
+meltwater: three soft pools on the turquoise (an aqua light from the upper left, a glacier-blue cast up on the
+right, the depth down on the right), each fading along a cosine over nine stops so no pool has an edge or a
+change of pace. Every plate's gradient is dithered: a seamless blue-noise tile around mid-grey
+(`tools/grain.py`) laid on with soft-light moves each pixel a shade or two, so wide gradients never break into
+8-bit steps and their colours stay as they are. Wells and trays are sunk: an inset shadow, no
 outline. The tool sheets over the navy plate are held 0, 20 and 40 px high; they arrive on a plane tipped 14
 degrees away that settles flat as you scroll to them, pivoting on its foot so nothing swings out past the plate.
 The marks are blocks (face, lit top, shaded side) casting a soft shadow on their tray. Controls stay flat:
