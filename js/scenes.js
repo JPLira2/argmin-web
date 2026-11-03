@@ -1,7 +1,8 @@
 /* scenes.js - the stages. The hero's stage plays the day once: the routes untangle and the truck drives the
    model's route, then the stock evens out, then the shifts move to where the demand is, then everything
-   settles at the bottom of the cost curve, and it rests there. Rutas, Stock and Turnos replay one scene;
-   the pause button stops the sequence (and replays it once it has ended). Beside each service, a small
+   settles at the bottom of the cost curve, and it rests there. Rutas, Stock and Turnos replay one scene.
+   Behind the offer, shooting stars draw the descents to the minimum, round and round; the pause button holds
+   the day and the stars together, and once the day is over it holds the stars. Beside each service, a small
    stage shows that scene today and then with the model, each time it comes into view.
 
    Every stage is drawn by the build at rest (js/scene-layouts.js), so the page is complete without script.
@@ -187,8 +188,8 @@ class Stage {
   }
 }
 
-// ---------- the hero: the day, played once ----------
-function hero(root) {
+// ---------- the hero: the day, played once, and the stars behind it ----------
+function hero(root, stars) {
   const stage = new Stage(root);
   const buttons = [...root.querySelectorAll('[data-play]')];
   const pause = root.querySelector('[data-pause]');
@@ -196,17 +197,9 @@ function hero(root) {
   const caps = json(root.dataset.caps, {});
   const order = ['rutas', 'stock', 'turnos', 'minimo'];
   const holds = { rutas: 1300, stock: 2300, turnos: 2300, minimo: 0 };
-  let state = 'idle';            // idle, playing, paused, done
+  let state = 'idle';            // idle, playing, paused (the day held), done (the day over), still (the stars held after it)
   let gate = null, run = 0, seen = true;
-  // the descents behind the offer: a shooting star down each while the day plays; the pause button holds them
-  // (css), and so does the hero leaving the screen
-  const sky = root.closest('.hero')?.querySelector('.descent');
-  const fly = () => {
-    if (!sky) return;
-    sky.classList.remove('fly');
-    sky.getBoundingClientRect();                 // a fresh start: the stars fly from the top of their paths
-    sky.classList.add('fly');
-  };
+  const held = () => state === 'paused' || state === 'still';
 
   const say = name => {
     buttons.forEach(b => b.setAttribute('aria-pressed', String(b.dataset.play === name)));
@@ -214,10 +207,11 @@ function hero(root) {
     cap.querySelector('strong').textContent = title;
     cap.querySelector('span').textContent = text;
   };
-  // the button says what it will do: pause while the day plays (or is about to), go on when paused, replay at the end
+  // the button says what it will do, pause or go on, and the stars stop with it, and while the hero is out of sight
   const label = () => {
-    pause.textContent = pause.dataset[state === 'paused' ? 'off' : state === 'done' ? 'again' : 'on'];
-    pause.setAttribute('aria-pressed', String(state === 'paused'));
+    pause.textContent = pause.dataset[held() ? 'off' : 'on'];
+    pause.setAttribute('aria-pressed', String(held()));
+    stars?.hold(held() || !seen);
   };
   // the sequence waits here while paused or off screen
   const go = () => (state === 'paused' || !seen ? new Promise(r => { gate = r; }) : Promise.resolve());
@@ -226,8 +220,8 @@ function hero(root) {
   async function sequence() {
     const mine = ++run;
     if (state !== 'paused') state = 'playing';   // paused before the day began: it waits at the start
+    stars?.start();
     label();
-    fly();
     for (const name of order) {
       await go();
       if (mine !== run) return;
@@ -247,8 +241,8 @@ function hero(root) {
   say('rutas');
 
   buttons.forEach(b => b.addEventListener('click', async () => {
-    run++;                         // the sequence stops; this scene plays on its own
-    state = 'done';
+    run++;                         // the sequence stops; this scene plays on its own (held stars stay held)
+    state = held() ? 'still' : 'done';
     label();
     say(b.dataset.play);
     root.querySelector('.stage-cap').setAttribute('aria-live', 'polite');
@@ -258,19 +252,19 @@ function hero(root) {
   }));
 
   pause.addEventListener('click', () => {
-    if (state === 'playing' || state === 'idle') { state = 'paused'; label(); return; }
-    if (state === 'paused') { state = 'playing'; label(); free(); return; }
-    if (reduced) { say('rutas'); stage.set('rutas', 'after'); return; }
-    stage.set('rutas', 'before');
-    say('rutas');
-    wait(400).then(sequence);
+    if (state === 'playing' || state === 'idle') state = 'paused';
+    else if (state === 'paused') state = 'playing';
+    else state = state === 'still' ? 'done' : 'still';   // the day is over: the button holds the stars, and lets them go
+    label();
+    free();
   });
 
-  const reset = () => { run++; state = 'done'; label(); stage.set(stage.scene, 'after'); };
-  if (reduced) { state = 'done'; label(); return { stage, reset }; }
+  const reset = () => { run++; state = held() ? 'still' : 'done'; label(); stage.set(stage.scene, 'after'); };
+  // with reduced motion nothing moves by itself, so there is nothing to pause
+  if (reduced) { state = 'done'; pause.hidden = true; return { stage, reset }; }
   label();
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver(([e]) => { seen = e.isIntersecting; sky?.classList.toggle('is-away', !seen); free(); }, { threshold: 0.25 }).observe(root);
+    new IntersectionObserver(([e]) => { seen = e.isIntersecting; label(); free(); }, { threshold: 0.25 }).observe(root);
   }
   const start = () => wait(650).then(sequence);
   const html = document.documentElement;
@@ -323,16 +317,59 @@ function pin(sky) {
   sky.setAttribute('viewBox', `${(mx - ax * w).toFixed(1)} ${(my - ay * h).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
 }
 
+// ---------- the descents' shooting stars: each run is a line its own star draws, one every 6 s, round and round.
+// The head goes out as it reaches the minimum and its tail slides in after it, every tail the same length on
+// screen whatever the run's; as the next star sets off, the track of the one before is wiped. Every timing is
+// worked out from the run's real length, so it lives here rather than in the css ----------
+function flight(sky) {
+  const runs = [...sky.querySelectorAll('.run')];
+  const GAP = 6000, FLY = 3000, WIPE = 800, P = GAP * runs.length, TAIL = 110, BODY = 34;
+  const EDGE = 0.02;              // off the ends of the run by this much while waiting, so no round cap shows
+  let anims = null, held = true;
+  const begin = () => {
+    sky.classList.add('fly');
+    anims = runs.flatMap((run, i) => {
+      const trail = run.querySelector('.trail'), L = trail.getTotalLength();
+      const tl = TAIL / L, hit = FLY / P, end = FLY * (1 + tl + EDGE) / P;
+      const timing = { duration: P, delay: i * GAP, iterations: Infinity, fill: 'both' };
+      const out = [
+        // the run stays until the next sets off, then its track is wiped
+        run.animate([{ opacity: 1 }, { opacity: 1, offset: GAP / P }, { opacity: 0, offset: (GAP + WIPE) / P }, { opacity: 0 }], timing),
+        // the line grows right behind the head
+        trail.animate([{ strokeDashoffset: 1 + EDGE }, { strokeDashoffset: 0, offset: hit }, { strokeDashoffset: 0 }], timing)
+      ];
+      for (const [k, len, glow] of [['tail', tl, 0.22], ['body', BODY / L, 0.5], ['head', 0.001, 1]]) {
+        const el = run.querySelector(`.star-${k}`), gone = len - 1 - tl - EDGE;
+        el.style.strokeDasharray = `${len} 3`;
+        el.style.opacity = glow;
+        out.push(el.animate([{ strokeDashoffset: len + EDGE }, { strokeDashoffset: len - 1, offset: hit },
+          { strokeDashoffset: gone, offset: end }, { strokeDashoffset: gone }], timing));
+      }
+      // each step lights as the head reaches it
+      for (const c of run.querySelectorAll('.steps circle')) {
+        const f = Number(c.dataset.f) * hit;
+        out.push(c.animate([{ opacity: 0, transform: 'scale(0)' }, { opacity: 0, transform: 'scale(0)', offset: f },
+          { opacity: 1, transform: 'scale(1.7)', offset: f + 0.012 }, { opacity: 1, transform: 'scale(1)', offset: f + 0.035 },
+          { opacity: 1, transform: 'scale(1)' }], timing));
+      }
+      return out;
+    });
+  };
+  return {
+    start() { if (!anims) begin(); this.hold(held); },
+    hold(on) { held = on; anims?.forEach(a => (on ? a.pause() : a.play())); }
+  };
+}
+
 const stages = [];
 const top = document.querySelector('[data-stage="hero"]');
 const descent = document.querySelector('.hero .descent');
 if (descent) {
-  // each step lights when its star reaches it: its place along its run, for the css to time it by
-  descent.querySelectorAll('.steps circle').forEach(c => c.style.setProperty('--f', c.dataset.f));
   pin(descent);
   document.fonts?.ready.then(() => pin(descent));   // the headline in its own face moves the offer and the well
 }
-if (top) stages.push(hero(top));
+const stars = descent && !reduced ? flight(descent) : null;
+if (top) stages.push(hero(top, stars));
 document.querySelectorAll('[data-stage="fig"]').forEach(root => stages.push(figure(root)));
 
 // a new size lays every stage out again, finished: a resize is not the moment to replay anything

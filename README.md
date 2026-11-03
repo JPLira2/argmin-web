@@ -59,6 +59,9 @@ Other tools, run only when their inputs change:
 
 - **Build:** none. The output directory is the repository root, and Pages picks up `functions/`
   automatically.
+- **Links are relative** (styles, scripts, fonts, pictures, the language switch, the API calls), so the
+  same files also work under a folder: the preview on GitHub Pages, https://jplira2.github.io/argmin-web/,
+  runs everything except `functions/` (the UF falls back to the build's value, and the form says it is off).
 - **`/api/uf`** reads today's UF from SII's table and caches it for six hours. If SII is unreachable,
   the page keeps the UF value written at build time, with its date.
 - **`/api/contacto`** sends the form through Resend once these variables are set in the Pages project:

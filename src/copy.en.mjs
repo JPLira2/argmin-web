@@ -38,7 +38,7 @@ export default {
       produccion: ['Production.', 'Fewer changeovers, more orders in the shift.']
     },
     tabs: [['rutas', 'Routes'], ['stock', 'Stock'], ['turnos', 'Shifts']],
-    pause: { on: 'Pause', off: 'Resume', again: 'Play again' },
+    pause: { on: 'Pause', off: 'Resume' },
     key: ['What is lost today', 'The model’s plan'],
     labels: {
       turnos: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
