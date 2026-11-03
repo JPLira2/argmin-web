@@ -317,39 +317,135 @@ function pin(sky) {
   sky.setAttribute('viewBox', `${(mx - ax * w).toFixed(1)} ${(my - ay * h).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
 }
 
-// ---------- the descents' shooting stars: each run is a line its own star draws, one every 6 s, round and round.
-// The head goes out as it reaches the minimum and its tail slides in after it, every tail the same length on
-// screen whatever the run's; as the next star sets off, the track of the one before is wiped. Every timing is
-// worked out from the run's real length, so it lives here rather than in the css ----------
-function flight(sky) {
+// ---------- the descents' shooting stars: each run is a line its own star draws, one every 6 s, round and round;
+// as the next sets off, the track of the one before is wiped. The star keeps the descent's own time: it reaches
+// the steps one beat after another (tools/descent.py), so it runs fast down the long first steps and slows as they
+// shrink, settling into the minimum the way the descent does; between steps its speed changes smoothly (a
+// monotone cubic through the beats). The line and its steps are svg, on the same beats. The star is painted on a
+// canvas over the drawing, because an svg stroke cannot fade along its length: its tail is one tapered ribbon,
+// a hairline where it ends and full at the head, its colour rising from the line's own blue to white, and as long
+// as the star is fast, so it shortens as the star slows and draws into the head as it comes to rest ----------
+function smooth(xs, ys) {
+  // a monotone cubic (Fritsch and Carlson) through the points: value and slope at any x
+  const n = xs.length, h = [], d = [], m = [];
+  for (let i = 0; i < n - 1; i++) { h[i] = xs[i + 1] - xs[i]; d[i] = (ys[i + 1] - ys[i]) / h[i]; }
+  m[0] = d[0];
+  m[n - 1] = d[n - 2];
+  for (let i = 1; i < n - 1; i++) {
+    const w1 = 2 * h[i] + h[i - 1], w2 = h[i] + 2 * h[i - 1];
+    m[i] = d[i - 1] * d[i] <= 0 ? 0 : (w1 + w2) / (w1 / d[i - 1] + w2 / d[i]);
+  }
+  return x => {
+    let i = 0;
+    while (i < n - 2 && x > xs[i + 1]) i++;
+    const t = Math.min(1, Math.max(0, (x - xs[i]) / h[i])), t2 = t * t, t3 = t2 * t;
+    return [(2 * t3 - 3 * t2 + 1) * ys[i] + (t3 - 2 * t2 + t) * h[i] * m[i] + (3 * t2 - 2 * t3) * ys[i + 1] + (t3 - t2) * h[i] * m[i + 1],
+      ((6 * t2 - 6 * t) * ys[i] + (6 * t - 6 * t2) * ys[i + 1]) / h[i] + (3 * t2 - 4 * t + 1) * m[i] + (3 * t2 - 2 * t) * m[i + 1]];
+  };
+}
+
+function flight(sky, canvas) {
   const runs = [...sky.querySelectorAll('.run')];
-  const GAP = 6000, FLY = 3000, WIPE = 800, P = GAP * runs.length, TAIL = 110, BODY = 34;
-  const EDGE = 0.02;              // off the ends of the run by this much while waiting, so no round cap shows
-  let anims = null, held = true;
+  const GAP = 6000, FLY = 3000, LAND = 450, WIPE = 800, P = GAP * runs.length;
+  const TAIL = 0.3, LONGEST = 120, SHORTEST = 12, GLOW = 8;   // the tail: as long as 0.3 s of flight, within these
+  const LINE = [74, 107, 166], STAR = [240, 246, 255];       // the line's blue, the head's white
+  const ctx = canvas.getContext('2d');
+  const num = s => s.split(' ').map(Number);
+  // each run sampled once, a point every unit along it, with its beats
+  const tracks = runs.map(run => {
+    const path = run.querySelector('.trail'), L = path.getTotalLength(), pts = [];
+    for (let s = 0; s <= L; s++) { const q = path.getPointAtLength(s); pts.push([q.x, q.y]); }
+    const f = num(run.dataset.f), t = num(run.dataset.t);
+    return { L, pts, f, t, place: smooth(t, f.map(v => v * L)) };
+  });
+  const at = (tr, s) => tr.pts[Math.max(0, Math.min(tr.pts.length - 1, Math.round(s)))];
+  const rgba = (c, a) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+  let anims = null, held = true, frame = 0;
+
+  function star(tr, phase) {
+    const flying = phase <= FLY;
+    const [s, rate] = flying ? tr.place(phase / FLY) : [tr.L, 0];
+    const speed = rate / FLY * 1000;                               // units a second
+    const settle = flying ? 1 : Math.max(0, 1 - (phase - FLY) / LAND);
+    const long = Math.min(LONGEST, Math.max(SHORTEST, speed * TAIL)) * settle;
+    const from = Math.max(0, s - long);
+    // the tail, one ribbon: the run's points from its end to the head, widened along their normals
+    const spine = [];
+    for (let u = Math.ceil(from); u < s; u += 2) spine.push(at(tr, u));
+    spine.push(at(tr, s));
+    if (spine.length > 1 && long > 1) {
+      const left = [], right = [];
+      spine.forEach((p, i) => {
+        const a = spine[Math.max(0, i - 1)], b = spine[Math.min(spine.length - 1, i + 1)];
+        const dx = b[0] - a[0], dy = b[1] - a[1], n = Math.hypot(dx, dy) || 1;
+        const u = i / (spine.length - 1), w = 0.1 + 1.25 * u ** 1.4;
+        left.push([p[0] - dy / n * w, p[1] + dx / n * w]);
+        right.push([p[0] + dy / n * w, p[1] - dx / n * w]);
+      });
+      const [x0, y0] = spine[0], [x1, y1] = spine[spine.length - 1];
+      const fill = ctx.createLinearGradient(x0, y0, x1, y1);
+      fill.addColorStop(0, rgba(LINE, 0));
+      fill.addColorStop(0.6, rgba(LINE.map((v, j) => Math.round(v + (STAR[j] - v) * 0.45)), (0.45 * settle).toFixed(3)));
+      fill.addColorStop(1, rgba(STAR, (0.95 * settle).toFixed(3)));
+      ctx.fillStyle = fill;
+      ctx.beginPath();
+      left.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+      for (let i = right.length - 1; i >= 0; i--) ctx.lineTo(right[i][0], right[i][1]);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // the head: a small core in a soft glow, fading as it comes to rest
+    const [hx, hy] = at(tr, s);
+    const glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, GLOW);
+    glow.addColorStop(0, rgba(STAR, (0.38 * settle).toFixed(3)));
+    glow.addColorStop(1, rgba(STAR, 0));
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(hx, hy, GLOW, 0, 2 * Math.PI);
+    ctx.fill();
+    ctx.fillStyle = rgba(STAR, settle.toFixed(3));
+    ctx.beginPath();
+    ctx.arc(hx, hy, 1.7, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  function draw() {
+    const dpr = devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const vb = sky.viewBox.baseVal, k = dpr * w / vb.width;          // the drawing's units, as pinned, to pixels
+    ctx.setTransform(k, 0, 0, k, -vb.x * k, -vb.y * k);
+    const now = Number(anims[0].currentTime) || 0;
+    tracks.forEach((tr, i) => {
+      const local = now - i * GAP;
+      if (local < 0) return;
+      const phase = local % P;
+      if (phase <= FLY + LAND) star(tr, phase);
+    });
+    frame = held ? 0 : requestAnimationFrame(draw);
+  }
+
   const begin = () => {
     sky.classList.add('fly');
     anims = runs.flatMap((run, i) => {
-      const trail = run.querySelector('.trail'), L = trail.getTotalLength();
-      const tl = TAIL / L, hit = FLY / P, end = FLY * (1 + tl + EDGE) / P;
+      const tr = tracks[i], hit = FLY / P;
       const timing = { duration: P, delay: i * GAP, iterations: Infinity, fill: 'both' };
       const out = [
         // the run stays until the next sets off, then its track is wiped
         run.animate([{ opacity: 1 }, { opacity: 1, offset: GAP / P }, { opacity: 0, offset: (GAP + WIPE) / P }, { opacity: 0 }], timing),
-        // the line grows right behind the head
-        trail.animate([{ strokeDashoffset: 1 + EDGE }, { strokeDashoffset: 0, offset: hit }, { strokeDashoffset: 0 }], timing)
+        // the line grows behind the head, on the same beats
+        run.querySelector('.trail').animate([...tr.t.map((t, j) => ({ strokeDashoffset: 1 - tr.f[j], offset: t * hit })),
+          { strokeDashoffset: 0 }], timing)
       ];
-      for (const [k, len, glow] of [['tail', tl, 0.22], ['body', BODY / L, 0.5], ['head', 0.001, 1]]) {
-        const el = run.querySelector(`.star-${k}`), gone = len - 1 - tl - EDGE;
-        el.style.strokeDasharray = `${len} 3`;
-        el.style.opacity = glow;
-        out.push(el.animate([{ strokeDashoffset: len + EDGE }, { strokeDashoffset: len - 1, offset: hit },
-          { strokeDashoffset: gone, offset: end }, { strokeDashoffset: gone }], timing));
-      }
-      // each step lights as the head reaches it
-      for (const c of run.querySelectorAll('.steps circle')) {
-        const f = Number(c.dataset.f) * hit;
-        out.push(c.animate([{ opacity: 0, transform: 'scale(0)' }, { opacity: 0, transform: 'scale(0)', offset: f },
-          { opacity: 1, transform: 'scale(1.7)', offset: f + 0.012 }, { opacity: 1, transform: 'scale(1)', offset: f + 0.035 },
+      // each step lights on its beat
+      for (const c of run.querySelectorAll('.iterates circle')) {
+        const t = Number(c.dataset.t) * hit;
+        out.push(c.animate([{ opacity: 0, transform: 'scale(0)' }, { opacity: 0, transform: 'scale(0)', offset: t },
+          { opacity: 1, transform: 'scale(1.4)', offset: t + 0.012 }, { opacity: 1, transform: 'scale(1)', offset: t + 0.035 },
           { opacity: 1, transform: 'scale(1)' }], timing));
       }
       return out;
@@ -357,7 +453,12 @@ function flight(sky) {
   };
   return {
     start() { if (!anims) begin(); this.hold(held); },
-    hold(on) { held = on; anims?.forEach(a => (on ? a.pause() : a.play())); }
+    hold(on) {
+      held = on;
+      anims?.forEach(a => (on ? a.pause() : a.play()));
+      cancelAnimationFrame(frame);
+      frame = anims && !on ? requestAnimationFrame(draw) : 0;   // held, the canvas keeps the star where it stopped
+    }
   };
 }
 
@@ -368,7 +469,8 @@ if (descent) {
   pin(descent);
   document.fonts?.ready.then(() => pin(descent));   // the headline in its own face moves the offer and the well
 }
-const stars = descent && !reduced ? flight(descent) : null;
+const comets = document.querySelector('.hero .comets');
+const stars = descent && comets && !reduced ? flight(descent, comets) : null;
 if (top) stages.push(hero(top, stars));
 document.querySelectorAll('[data-stage="fig"]').forEach(root => stages.push(figure(root)));
 

@@ -138,12 +138,22 @@ belongs to the depth system; none is decoration.
 - One light, from the upper left. Plates are lit at the top left and cast navy shadows down and a little
   right; sheets lie at one of three heights.
 - The navy plates carry gradient descent, the page's only texture: the level sets of an irregular cost surface
-  and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand. It fades out towards
+  and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand, and drawn as a
+  cartographer would: smooth hairline curves traced on a grid twice as fine as the drawing, every fifth line an
+  index contour at twice the weight, each run a smooth trajectory through its steps. It fades out towards
   the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting
   star draws, its steps lighting as the star passes: one every 6 s, round and round, and as the next sets off
-  the last one's track is wiped, so one run shows at a time. The head goes out at the minimum and its tail
-  slides in after it, every tail the same length on screen. At rest (no script, reduced motion) the last run
-  shows. The lowest point, a small ring, sits in the clear between the offer and the scene's well, at every size.
+  the last one's track is wiped, so one run shows at a time. The runs come in through the open pocket right of
+  and below the offer, from the right edge or rising from behind the scene's well, and never cross its words.
+  The star keeps the descent's own time: it reaches the steps one beat after another, so it runs fast down the
+  long first steps and slows as they shrink, settling into the minimum as the descent does, its speed changing
+  smoothly between steps. It is painted on a canvas over the drawing, since an svg stroke cannot fade along its
+  length: its tail is one tapered ribbon under one gradient, a hairline where it ends and full at the head,
+  rising from the line's own blue to white, and as long as the star is fast, so it shortens as the star slows;
+  the head is a small core in a soft glow that fades at the minimum while the tail draws in after it. The last
+  zig-zags crowd the minimum, so a step is marked only where it stands clear of the one before. At rest (no
+  script, reduced motion) the last run shows. The lowest point, one small point, sits in the clear between the
+  offer and the scene's well, at every size.
 - The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.
 - Display type is one ink, uppercase, never with an accented word.
 - Motion explains a state change. Where the browser ties animation to the scroll, the hero sinks back as you
@@ -232,8 +242,12 @@ little right, and soft:
   `3px 18px 36px -14px`.
 - **Lift 3**, plates and the map: `0 4px 10px` and `6px 40px 80px -30px`.
 
-Plates add a lit top edge (a 1 px inset highlight) and a soft light from the upper left; the turquoise plate is
-modelled from a lighter top left to a deeper bottom right. Wells and trays are sunk: an inset shadow, no
+Plates add a lit top edge (a 1 px inset highlight) and a soft light from the upper left. The turquoise plate is
+meltwater: three soft pools on the turquoise (an aqua light from the upper left, a glacier-blue cast up on the
+right, the depth down on the right), each fading along a cosine over nine stops so no pool has an edge or a
+change of pace. Every plate's gradient is dithered: a seamless blue-noise tile around mid-grey
+(`tools/grain.py`) laid on with soft-light moves each pixel a shade or two, so wide gradients never break into
+8-bit steps and their colours stay as they are. Wells and trays are sunk: an inset shadow, no
 outline. The tool sheets over the navy plate are held 0, 20 and 40 px high; they arrive on a plane tipped 14
 degrees away that settles flat as you scroll to them, pivoting on its foot so nothing swings out past the plate.
 The marks are blocks (face, lit top, shaded side) casting a soft shadow on their tray. Controls stay flat:
