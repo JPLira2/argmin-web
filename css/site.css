@@ -418,12 +418,13 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
 [data-ui] .ui-chart text { fill: var(--ink); font: 600 13px/1 var(--text); font-variant-numeric: tabular-nums; }
 [data-ui] .ui-chart .ui-axis { fill: var(--ink-2); font-weight: 400; }
 [data-ui].ui-report .ui-finding { padding: 4px 18px 16px; }
-/* on a wide screen the three sheets are held at three heights over the plate. They arrive on a plane tipped away
-   from you that settles flat as you scroll to them (below); the plane pivots on its foot, so as it tips its top
-   goes back and smaller and nothing swings out past the plate's edges */
+/* on a wide screen the three sheets arrive on a plane tipped away from you, held at three heights over it, and
+   settle flat as you scroll to them (below); the plane pivots on its foot, so as it tips its top goes back and
+   smaller and nothing swings out past the plate's edges. Once settled nothing is transformed at all: text drawn
+   in depth is drawn soft, so at rest the sheets are flat and their words sharp, and the route sheet's deeper
+   shadow keeps it lifted */
 @media (min-width: 900px) {
-  .gets-grid { transform: perspective(2400px); transform-origin: 50% 100%; transform-style: preserve-3d; }
-  .gets-item { transform: translateZ(var(--z, 0px)); }
+  .gets-grid { transform-origin: 50% 100%; transform-style: preserve-3d; }
   .gets-report { --z: 20px; }
   .gets-route { --z: 40px; }
   .gets-route [data-ui] { box-shadow: 0 2px 4px rgb(0 0 0 / .2), 8px 40px 70px -22px rgb(0 0 0 / .7); }
@@ -590,16 +591,20 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
    you reach them. Without it, everything simply rests where it is. */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
-    .hero { transform-origin: 50% 100%; animation: sink linear both; animation-timeline: view(); animation-range: exit 0% exit 85%; }
-    .calc, .gets, .contact { transform-origin: 50% 0; animation: arrive linear both; animation-timeline: view(); animation-range: entry 0% entry 35%; }
+    /* each fills only on the side where it moves, so at rest nothing is left transformed (or drawn soft) */
+    .hero { transform-origin: 50% 100%; animation: sink linear forwards; animation-timeline: view(); animation-range: exit 0% exit 85%; }
+    .calc, .gets, .contact { transform-origin: 50% 0; animation: arrive linear backwards; animation-timeline: view(); animation-range: entry 0% entry 35%; }
   }
   @media (min-width: 900px) and (prefers-reduced-motion: no-preference) {
-    .gets-grid { animation: settle linear both; animation-timeline: view(); animation-range: entry 0% entry 75%; }
+    /* the plane and the sheets' heights share the plane's own timeline, and are flat before you read them */
+    .gets-grid { view-timeline: --gets block; animation: settle linear backwards; animation-timeline: --gets; animation-range: entry 0% entry 45%; }
+    .gets-item { animation: rest linear backwards; animation-timeline: --gets; animation-range: entry 0% entry 45%; }
   }
 }
 @keyframes sink { to { transform: perspective(1600px) rotateX(8deg) scale(.93); filter: brightness(.78); } }
 @keyframes arrive { from { transform: perspective(1600px) rotateX(-5deg) translateY(32px) scale(.98); } }
-@keyframes settle { from { transform: perspective(2400px) rotateX(14deg); } to { transform: perspective(2400px); } }
+@keyframes settle { from { transform: perspective(2400px) rotateX(14deg); } to { transform: none; } }
+@keyframes rest { from { transform: translateZ(var(--z, 0px)); } to { transform: none; } }
 
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }

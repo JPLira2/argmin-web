@@ -250,8 +250,11 @@ right, the depth down on the right), each fading along a cosine over nine stops 
 change of pace. Every plate's gradient is dithered: a seamless blue-noise tile around mid-grey
 (`tools/grain.py`) laid on with soft-light moves each pixel a shade or two, so wide gradients never break into
 8-bit steps and their colours stay as they are. Wells and trays are sunk: an inset shadow, no
-outline. The tool sheets over the navy plate are held 0, 20 and 40 px high; they arrive on a plane tipped 14
-degrees away that settles flat as you scroll to them, pivoting on its foot so nothing swings out past the plate.
+outline. The tool sheets over the navy plate arrive on a plane tipped 14 degrees away, held 0, 20 and 40 px
+above it, pivoting on its foot so nothing swings out past the plate; plane and heights settle flat by the time
+the plate's top passes the middle of the screen. At rest nothing is transformed: text drawn in depth is drawn
+soft, so the sheets you read are flat and their depth is in their shadows. Every scroll-tied motion fills only
+on the side where it moves, so nothing is left transformed at rest.
 The marks are blocks (face, lit top, shaded side) casting a soft shadow on their tray. Controls stay flat:
 the depth is in the surfaces. A surface declares its elevation once, a shadow or a tone step, never a border
 under a shadow.
