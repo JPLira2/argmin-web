@@ -1,18 +1,18 @@
-/* vrp.mjs - the example delivery day and its solve. Shared by the page (js/routes.js) and the
-   build (tools/build.mjs), so the numbers printed in the HTML are the ones the browser computes.
+/* vrp.mjs - the example delivery days and their solve. Shared by the page (js/routes.js, js/scenes.js)
+   and the build (tools/build.mjs), so the numbers printed in the HTML are the ones the browser computes.
 
-   A distributor in Quilicura has 18 orders and two trucks of 10 stops each. "Today's plan" is the
-   naive one: orders go to the trucks in turn, in the order they arrived. The solve is a local search
+   A distributor in Quilicura has a day of orders and a few trucks with a limit of stops each (the
+   hero's small day: 18 orders, 2 trucks; the route section's: 40 orders, 4 trucks). "Today's plan" is
+   the one a person makes by hand (each truck its zone, nearest stop next). The solve is a local search
    (2-opt, relocate, swap, 2-opt*) started from that plan, then perturbed and searched again; every
    improvement is recorded so the page can draw the routes untangling. Distances are 1.35 times the
    straight line, a stand-in for streets. Everything here is example data. */
 
 export const ROAD_FACTOR = 1.35;
 export const COST_PER_KM = 500;          // CLP per km, an assumption stated on the page
-export const TRUCKS = 2;
-export const CAPACITY = 10;              // stops per truck
-export const ORDERS = 18;
-export const DEFAULT_SEED = 3;
+export const SMALL = { orders: 18, trucks: 2, capacity: 10 };    // the hero's day and the service figure's
+export const FLEET = { orders: 40, trucks: 4, capacity: 12 };    // the route section's day (capacity: stops per truck)
+export const DEFAULT_SEED = 3;           // the hero's day
 
 export const DEPOT = { lat: -33.3626, lon: -70.7300 };   // Quilicura, the industrial side
 
@@ -45,15 +45,17 @@ export function rng(seed) {
 }
 
 // ---------- the day ----------
-export function makeDay(seed) {
+// a busy day sends more than one order to a comuna: the pool refills once every comuna has one
+export function makeDay(seed, { orders, trucks, capacity } = SMALL) {
   const r = rng(seed);
   const pool = PLACES.slice();
   const stops = [];
-  while (stops.length < ORDERS) {
+  while (stops.length < orders) {
+    if (!pool.length) pool.push(...PLACES);
     const [name, lat, lon] = pool.splice(Math.floor(r() * pool.length), 1)[0];
     stops.push({ name, lat: lat + (r() - 0.5) * 0.014, lon: lon + (r() - 0.5) * 0.016 });
   }
-  return { seed, stops };   // stops are listed in the order the orders arrived
+  return { seed, stops, trucks, capacity };   // stops are listed in the order the orders arrived
 }
 
 function haversine(a, b) {
@@ -82,8 +84,8 @@ const clone = plan => plan.map(r => r.slice());
 export function naivePlan(day, D = matrix(day)) {
   const angle = s => Math.atan2(s.lat - DEPOT.lat, (s.lon - DEPOT.lon) * Math.cos(DEPOT.lat * Math.PI / 180));
   const bySector = day.stops.map((s, i) => ({ i: i + 1, a: angle(s) })).sort((p, q) => p.a - q.a);
-  const half = Math.ceil(bySector.length / TRUCKS);
-  return Array.from({ length: TRUCKS }, (_, k) => {
+  const half = Math.ceil(bySector.length / day.trucks);
+  return Array.from({ length: day.trucks }, (_, k) => {
     const left = bySector.slice(k * half, (k + 1) * half).map(p => p.i);
     const route = [];
     let at = 0;
@@ -99,7 +101,7 @@ export function naivePlan(day, D = matrix(day)) {
 
 // ---------- local search ----------
 // best improving move among the four neighbourhoods; returns the new plan or null
-function bestMove(D, plan) {
+function bestMove(D, plan, cap) {
   let best = null, gain = 1e-9;
   const n = plan.length;
   // 2-opt inside each route
@@ -116,7 +118,7 @@ function bestMove(D, plan) {
     const r = plan[k], s = r[i], a = i ? r[i - 1] : 0, b = i + 1 < r.length ? r[i + 1] : 0;
     const remove = D[a][s] + D[s][b] - D[a][b];
     for (let l = 0; l < n; l++) {
-      if (l !== k && plan[l].length >= CAPACITY) continue;
+      if (l !== k && plan[l].length >= cap) continue;
       const t = l === k ? r.filter((_, x) => x !== i) : plan[l];
       for (let j = 0; j <= t.length; j++) {
         const c = j ? t[j - 1] : 0, d = j < t.length ? t[j] : 0;
@@ -136,7 +138,7 @@ function bestMove(D, plan) {
   for (let k = 0; k < n; k++) for (let l = k + 1; l < n; l++) {
     const r = plan[k], t = plan[l];
     for (let i = 0; i <= r.length; i++) for (let j = 0; j <= t.length; j++) {
-      if (i + (t.length - j) > CAPACITY || j + (r.length - i) > CAPACITY) continue;
+      if (i + (t.length - j) > cap || j + (r.length - i) > cap) continue;
       const a = i ? r[i - 1] : 0, b = i < r.length ? r[i] : 0, c = j ? t[j - 1] : 0, d = j < t.length ? t[j] : 0;
       const g = D[a][b] + D[c][d] - D[a][d] - D[c][b];
       if (g > gain) { gain = g; best = () => { const p = clone(plan); p[k] = [...r.slice(0, i), ...t.slice(j)]; p[l] = [...t.slice(0, j), ...r.slice(i)]; return p; }; }
@@ -145,24 +147,24 @@ function bestMove(D, plan) {
   return best ? best() : null;
 }
 
-function descend(D, plan, steps) {
-  let next = bestMove(D, plan);
+function descend(D, plan, cap, steps) {
+  let next = bestMove(D, plan, cap);
   while (next) {
     plan = next;
     if (steps) steps.push(clone(plan));
-    next = bestMove(D, plan);
+    next = bestMove(D, plan, cap);
   }
   return plan;
 }
 
 // move a few stops to random places, keeping capacity
-function perturb(D, plan, r) {
+function perturb(D, plan, r, cap) {
   const p = clone(plan);
   for (let m = 0; m < 3; m++) {
     const k = Math.floor(r() * p.length);
     if (!p[k].length) continue;
     const s = p[k].splice(Math.floor(r() * p[k].length), 1)[0];
-    const open = p.map((q, i) => i).filter(i => p[i].length < CAPACITY);
+    const open = p.map((q, i) => i).filter(i => p[i].length < cap);
     const l = open[Math.floor(r() * open.length)];
     p[l].splice(Math.floor(r() * (p[l].length + 1)), 0, s);
   }
@@ -175,10 +177,10 @@ export function solve(day, iterations = 160) {
   const D = matrix(day);
   const naive = naivePlan(day, D);
   const steps = [clone(naive)];
-  let best = descend(D, clone(naive), steps), bestKm = planKm(D, best);
+  let best = descend(D, clone(naive), day.capacity, steps), bestKm = planKm(D, best);
   const r = rng(day.seed ^ 0x9e3779b9);
   for (let it = 0; it < iterations; it++) {
-    const cand = descend(D, perturb(D, best, r));
+    const cand = descend(D, perturb(D, best, r, day.capacity), day.capacity);
     const km = planKm(D, cand);
     if (km < bestKm - 1e-6) { best = cand; bestKm = km; steps.push(clone(best)); }
   }

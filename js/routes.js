@@ -1,21 +1,27 @@
-/* routes.js - the live solve. When the map comes into view it draws the example day as planned by
-   hand, then replays the search untangling it: every redraw is a plan the solver accepted, and the
-   model's figure is that plan's length, so the number falls because the routes got shorter, not
-   because a counter runs. "Otro día, otros pedidos" draws a new random day and solves it the same
-   way. With reduced motion the solved plan is shown at once. */
-import { DEFAULT_SEED, DEPOT, makeDay, planKm, solve, toFrame } from './vrp.js';
+/* routes.js - the live solve. When the map comes into view it draws the example day as planned by hand, in
+   red, then replays the search untangling it: every redraw is a plan the solver accepted (at most fourteen of
+   them, evenly spread, always ending on the best), the lines turn to the model's blue as the search starts,
+   and the model's figure is the drawn plan's length, so the number falls because the routes got shorter, not
+   because a counter runs. Then the truck drives the longest route once and parks at the warehouse, and the
+   plan by hand can be laid over the model's to compare. "Otro día, otros pedidos" draws a new random day and
+   solves it the same way. With reduced motion the solved plan is shown at once. */
+import { FLEET, DEPOT, makeDay, planKm, solve, toFrame } from './vrp.js';
+import { drive, face, place } from './truck.js';
 
 const fig = document.querySelector('[data-routes]');
 
 if (fig) {
   const NS = 'http://www.w3.org/2000/svg';
   const svg = fig.querySelector('.map-plan');
+  const frame = fig.querySelector('.map-frame');
+  const truck = fig.querySelector('.map-truck');
   const title = svg.querySelector('title');
   const specs = document.querySelector('.specs');
   const beforeEl = document.getElementById('r-before');
   const afterEl = document.getElementById('r-after');
   const savingEl = document.getElementById('r-saving');
   const again = document.getElementById('r-new');
+  const compare = document.getElementById('r-compare');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const locale = fig.dataset.locale;
@@ -23,10 +29,11 @@ if (fig) {
   const cpk = Number(fig.dataset.cpk);
   const n0 = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
   const n1 = new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-  const money = v => `${es ? '$' : 'CLP'} ${n0.format(v)}`;
-  const million = v => (es ? `$ ${n1.format(v / 1e6)} millones` : `CLP ${n1.format(v / 1e6)} million`);
+  const money = v => `${es ? '$' : 'CLP'} ${n0.format(v)}`;
+  const million = v => (es ? `$ ${n1.format(v / 1e6)} millones` : `CLP ${n1.format(v / 1e6)} million`);
   const wait = ms => new Promise(r => setTimeout(r, ms));
-  let token = 0;
+  const frameIdle = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+  let token = 0, ghosts = null;
 
   const make = (name, attrs) => {
     const e = document.createElementNS(NS, name);
@@ -35,14 +42,17 @@ if (fig) {
   };
   const points = (pts, route) => [0, ...route, 0].map(i => `${pts[i][0].toFixed(1)},${pts[i][1].toFixed(1)}`).join(' ');
 
-  function draw(day, plan) {
+  function draw(day, plan, naive) {
     const pts = [DEPOT, ...day.stops].map(toFrame);
     const routes = make('g', { class: 'routes' });
     const stops = make('g', { class: 'stops' });
-    const lines = plan.map((r, k) => routes.appendChild(make('polyline', { class: `route r${k + 1}`, points: points(pts, r) })));
-    day.stops.forEach((_, i) => stops.appendChild(make('circle', { class: 'stop', cx: pts[i + 1][0].toFixed(1), cy: pts[i + 1][1].toFixed(1), r: 7 })));
+    ghosts = make('g', { class: 'ghosts' });
+    naive.forEach(r => ghosts.appendChild(make('polyline', { class: 'route is-ghost', points: points(pts, r) })));
+    ghosts.style.display = 'none';
+    const lines = plan.map(r => routes.appendChild(make('polyline', { class: 'route', points: points(pts, r) })));
+    day.stops.forEach((_, i) => stops.appendChild(make('circle', { class: 'stop', cx: pts[i + 1][0].toFixed(1), cy: pts[i + 1][1].toFixed(1), r: 6 })));
     const depot = make('rect', { class: 'depot', x: (pts[0][0] - 9).toFixed(1), y: (pts[0][1] - 9).toFixed(1), width: 18, height: 18 });
-    svg.replaceChildren(title, routes, stops, depot);
+    svg.replaceChildren(title, ghosts, routes, stops, depot);
     return { pts, lines };
   }
 
@@ -58,14 +68,57 @@ if (fig) {
       .replace('{year}', million(saved * cpk * 250));
   }
 
+  // the comparison: today's plan laid over the model's, in red
+  function setCompare(on) {
+    compare.setAttribute('aria-pressed', String(on));
+    if (ghosts) ghosts.style.display = on ? '' : 'none';
+  }
+  compare.addEventListener('click', () => setCompare(compare.getAttribute('aria-pressed') !== 'true'));
+
+  // the map is drawn in a 1000 x 750 frame scaled to its box; the truck rides in the box's pixels
+  async function driveLongest(pts, plan, mine) {
+    const k = frame.clientWidth / 1000;
+    const longest = plan.reduce((a, b) => (b.length > a.length ? b : a));
+    const road = [0, ...longest, 0].map(i => [pts[i][0] * k, pts[i][1] * k]);
+    const w = Math.max(40, Math.min(72, frame.clientWidth * 0.1));
+    truck.style.width = `${w.toFixed(1)}px`;
+    truck.style.height = `${(w / 1.2).toFixed(1)}px`;
+    await drive(truck, road, { speed: 0.32, min: 2200, max: 3600, stillWanted: () => mine === token });
+  }
+
   async function play(seed) {
     const mine = ++token;
-    const day = makeDay(seed);
+    truck.classList.remove('is-on');
+    setCompare(false);
+    compare.hidden = true;
+    again.disabled = true;
+    const label = again.textContent;
+    again.textContent = again.dataset.busy;
+    await frameIdle();                       // let "Resolviendo…" show before the solve takes the thread
+    const day = makeDay(seed, FLEET);
     const res = solve(day);
-    if (reduced) { draw(day, res.best); show(res.naiveKm, res.bestKm, true); return; }
+    if (mine !== token) return;
+    const done = () => { again.disabled = false; again.textContent = label; compare.hidden = false; specs.removeAttribute('aria-busy'); };
+
+    if (reduced) {
+      const { pts, lines } = draw(day, res.best, res.naive);
+      lines.forEach(l => l.classList.add('is-model'));
+      show(res.naiveKm, res.bestKm, true);
+      // the truck waits at the warehouse, back from its longest round
+      const longest = res.best.reduce((a, b) => (b.length > a.length ? b : a));
+      const k = frame.clientWidth / 1000, [x0, y0] = pts[0], [x1, y1] = pts[longest[longest.length - 1]];
+      const w = Math.max(40, Math.min(72, frame.clientWidth * 0.1));
+      truck.style.width = `${w.toFixed(1)}px`;
+      truck.style.height = `${(w / 1.2).toFixed(1)}px`;
+      place(truck, x0 * k, y0 * k);
+      face(truck, x0 - x1, y0 - y1);
+      truck.classList.add('is-on');
+      done();
+      return;
+    }
 
     specs.setAttribute('aria-busy', 'true');
-    const { pts, lines } = draw(day, res.naive);
+    const { pts, lines } = draw(day, res.naive, res.naive);
     show(res.naiveKm, res.naiveKm, false);
     // the plan by hand draws in
     for (const l of lines) {
@@ -76,13 +129,14 @@ if (fig) {
       l.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.22, 1, .36, 1)';
       l.style.strokeDashoffset = '0';
     }
-    await wait(1600);
+    await wait(1500);
     if (mine !== token) return;
-    for (const l of lines) { l.style.transition = ''; l.style.strokeDasharray = ''; l.style.strokeDashoffset = ''; }
+    for (const l of lines) { l.style.transition = ''; l.style.strokeDasharray = ''; l.style.strokeDashoffset = ''; l.classList.add('is-model'); }
 
-    // the search, about two and a half seconds in all
-    const steps = res.steps.slice(1);
-    const dt = Math.max(180, Math.min(450, 2500 / Math.max(1, steps.length)));
+    // the search, about three seconds: at most fourteen of the accepted plans, the last one the best
+    const all = res.steps.slice(1);
+    const steps = all.length <= 14 ? all : Array.from({ length: 14 }, (_, i) => all[Math.round((i + 1) * all.length / 14) - 1]);
+    const dt = Math.max(200, Math.min(420, 3000 / Math.max(1, steps.length)));
     for (const plan of steps) {
       await wait(dt);
       if (mine !== token) return;
@@ -90,15 +144,18 @@ if (fig) {
       show(res.naiveKm, planKm(res.D, plan), false);
     }
     show(res.naiveKm, res.bestKm, true);
-    specs.removeAttribute('aria-busy');
+    done();
+    await wait(300);
+    if (mine !== token) return;
+    await driveLongest(pts, res.best, mine);
   }
 
   if ('IntersectionObserver' in window) {
     const io = new IntersectionObserver(entries => {
       if (!entries.some(e => e.isIntersecting)) return;
       io.disconnect();
-      play(Number(fig.dataset.seed) || DEFAULT_SEED);
-    }, { threshold: 0.3 });
+      play(Number(fig.dataset.seed) || 1);
+    }, { threshold: 0.35 });
     io.observe(fig);
   }
   again.addEventListener('click', () => play(1 + Math.floor(Math.random() * 1e9)));
