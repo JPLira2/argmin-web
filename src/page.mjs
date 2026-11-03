@@ -63,11 +63,11 @@ export default function page(c, x) {
   // as the star passes ----------
   const sky = x.descent;
   const run = p => `<g class="run"><path class="trail" pathLength="1" d="${p.d}"/>`
-    + `<g class="steps">${p.dots.map(([cx, cy, f]) => `<circle cx="${cx}" cy="${cy}" r="2.4" data-f="${f}"/>`).join('')}</g>`
+    + `<g class="iterates">${p.dots.map(([cx, cy, f]) => `<circle cx="${cx}" cy="${cy}" r="1.8" data-f="${f}"/>`).join('')}</g>`
     + ['tail', 'body', 'head'].map(k => `<path class="star-${k}" pathLength="1" d="${p.d}"/>`).join('') + '</g>';
   const descent = `<svg class="descent" viewBox="0 0 ${sky.W} ${sky.H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-w="${sky.W}" data-h="${sky.H}" data-min="${sky.min.join(' ')}">`
-    + `<path class="descent-rings" d="${sky.rings}"/>` + sky.paths.map(run).join('')
-    + ['min', 'core'].map(k => `<circle class="descent-${k}" cx="${sky.min[0]}" cy="${sky.min[1]}" r="${k === 'core' ? 2.2 : 7}"/>`).join('') + '</svg>';
+    + `<image class="descent-map" href="${x.up}assets/descent-map.svg" width="${sky.W}" height="${sky.H}"/>` + sky.paths.map(run).join('')
+    + `<circle class="descent-min" cx="${sky.min[0]}" cy="${sky.min[1]}" r="2.6"/></svg>`;
 
   // ---------- the route example ----------
   const ex = x.example;

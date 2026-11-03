@@ -346,7 +346,7 @@ function flight(sky) {
           { strokeDashoffset: gone, offset: end }, { strokeDashoffset: gone }], timing));
       }
       // each step lights as the head reaches it
-      for (const c of run.querySelectorAll('.steps circle')) {
+      for (const c of run.querySelectorAll('.iterates circle')) {
         const f = Number(c.dataset.f) * hit;
         out.push(c.animate([{ opacity: 0, transform: 'scale(0)' }, { opacity: 0, transform: 'scale(0)', offset: f },
           { opacity: 1, transform: 'scale(1.7)', offset: f + 0.012 }, { opacity: 1, transform: 'scale(1)', offset: f + 0.035 },

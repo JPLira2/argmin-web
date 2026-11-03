@@ -138,12 +138,15 @@ belongs to the depth system; none is decoration.
 - One light, from the upper left. Plates are lit at the top left and cast navy shadows down and a little
   right; sheets lie at one of three heights.
 - The navy plates carry gradient descent, the page's only texture: the level sets of an irregular cost surface
-  and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand. It fades out towards
+  and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand, and drawn as a
+  cartographer would: smooth hairline curves traced on a grid twice as fine as the drawing, every fifth line an
+  index contour at twice the weight, each run a smooth trajectory through its steps. It fades out towards
   the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting
   star draws, its steps lighting as the star passes: one every 6 s, round and round, and as the next sets off
   the last one's track is wiped, so one run shows at a time. The head goes out at the minimum and its tail
   slides in after it, every tail the same length on screen. At rest (no script, reduced motion) the last run
-  shows. The lowest point, a small ring, sits in the clear between the offer and the scene's well, at every size.
+  shows. The lowest point, one small point, sits in the clear between the offer and the scene's well, at every
+  size.
 - The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.
 - Display type is one ink, uppercase, never with an accented word.
 - Motion explains a state change. Where the browser ties animation to the scroll, the hero sinks back as you

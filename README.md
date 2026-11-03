@@ -52,7 +52,7 @@ Other tools, run only when their inputs change:
 | `python tools/props.py http://127.0.0.1:5174` | `assets/3d/truck.webp`: the truck in 16 headings | Playwright with Chrome; `tools/props.html` loads three.js from a CDN |
 | `python -I tools/wordmark.py <katex fonts dir>` | `assets/wordmark.svg`, `assets/favicon.svg` (Computer Modern outlines) | fontTools; KaTeX_Main-Regular.ttf and KaTeX_Math-Italic.ttf |
 | `python -I tools/santiago.py <roads.json>` | `data/santiago.json` (OpenStreetMap motorways and the Mapocho) | an Overpass dump |
-| `python tools/descent.py` | `src/descent.json` and `assets/descent.svg`: the texture of the navy plates, gradient descent on an irregular cost surface (its level sets and five runs to the minimum), as the drawing the first screen flies and as the mask for the other plates | numpy, scikit-image |
+| `python tools/descent.py` | `assets/descent-map.svg`, `src/descent.json` and `assets/descent.svg`: the texture of the navy plates, gradient descent on an irregular cost surface, drawn as a map (smooth hairline level sets, every fifth an index contour, and four runs to the minimum): the map and the runs the first screen flies, and the mask for the other plates | numpy, scikit-image |
 | `python tools/grain.py` | `assets/grain.png`: the dither under the plates' gradients, a seamless blue-noise tile around mid-grey that keeps wide gradients from banding | numpy, Pillow |
 | `python tools/og.py http://127.0.0.1:5174` | `favicon.ico`, `assets/apple-touch-icon.png`, `assets/og-es.jpg`, `assets/og-en.jpg` | Playwright with Chrome |
 

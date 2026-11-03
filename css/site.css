@@ -170,23 +170,21 @@ html:not(.js) .top { position: absolute; }   /* without script it never takes a 
    minimum beside the offer): the level sets, five runs with their steps, and the minimum, ringed a little brighter */
 .descent { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; color: var(--b-4);
            -webkit-mask: var(--fade); mask: var(--fade); }
-.descent-rings { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; opacity: .6; }
-/* the lowest point: a small ring a step lighter than the map, and its core */
-.descent-min { fill: none; stroke: #7894c8; stroke-width: 2; }
-.descent-core { fill: #8fa9d8; }
+/* the lowest point: one small point, a step lighter than the map */
+.descent-min { fill: #8fa9d8; }
 /* each run is a line drawn by its own shooting star, round and round: the line grows behind a bright head and a
    tail, each step lights as the head passes, and as the next star sets off the track before it is wiped.
    js/scenes.js times it all from each run's length; here only how it looks, and how it rests */
-.trail { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-dasharray: 1 2; opacity: .85; }
-.steps { fill: currentColor; }
-.steps circle { transform-box: fill-box; transform-origin: 50% 50%; }
+.trail { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; stroke-dasharray: 1 2; opacity: .85; }
+.iterates { fill: currentColor; }
+.iterates circle { transform-box: fill-box; transform-origin: 50% 50%; }
 .star-tail, .star-body, .star-head { fill: none; stroke: #e2ebfa; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
 .star-tail { stroke-width: 1.8; }
 .star-body { stroke-width: 2.6; }
 .star-head { stroke-width: 5.5; }
 /* at rest (no script, reduced motion) only the last run is drawn; with motion, none until its star comes */
 .descent:not(.fly) .run:not(:last-of-type) { display: none; }
-@media (prefers-reduced-motion: no-preference) { .js .descent:not(.fly) :is(.trail, .steps circle) { opacity: 0; } }
+@media (prefers-reduced-motion: no-preference) { .js .descent:not(.fly) :is(.trail, .iterates circle) { opacity: 0; } }
 
 /* the menu: a navy plate over the page, the sections in display type */
 .menu { position: fixed; inset: 0; z-index: 45; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; box-sizing: border-box;
