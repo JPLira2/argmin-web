@@ -143,8 +143,10 @@ belongs to the depth system; none is decoration.
   index contour at twice the weight, each run a smooth trajectory through its steps. It fades out towards
   the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting
   star draws, its steps lighting as the star passes: one every 6 s, round and round, and as the next sets off
-  the last one's track is wiped, so one run shows at a time. The head goes out at the minimum and its tail
-  slides in after it, every tail the same length on screen. At rest (no script, reduced motion) the last run
+  the last one's track is wiped, so one run shows at a time. The star is painted on a canvas over the drawing,
+  since an svg stroke cannot fade along its length: its tail tapers from a hairline to full width and rises from
+  the line's own blue to white at the head, so it melts into the line it leaves; the head is a small core in a
+  soft glow that settles and fades at the minimum while the tail draws in after it. At rest (no script, reduced motion) the last run
   shows. The lowest point, one small point, sits in the clear between the offer and the scene's well, at every
   size.
 - The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.

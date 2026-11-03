@@ -168,7 +168,7 @@ html:not(.js) .top { position: absolute; }   /* without script it never takes a 
 
 /* the first screen draws its descent in the page, so the runs can fly (tools/descent.py; js/scenes.js keeps the
    minimum beside the offer): the level sets, five runs with their steps, and the minimum, ringed a little brighter */
-.descent { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; color: var(--b-4);
+.descent, .comets { position: absolute; inset: 0; z-index: -1; width: 100%; height: 100%; border-radius: inherit; pointer-events: none; color: var(--b-4);
            -webkit-mask: var(--fade); mask: var(--fade); }
 /* the lowest point: one small point, a step lighter than the map */
 .descent-min { fill: #8fa9d8; }
@@ -178,10 +178,6 @@ html:not(.js) .top { position: absolute; }   /* without script it never takes a 
 .trail { fill: none; stroke: currentColor; stroke-width: 1.3; stroke-linejoin: round; stroke-dasharray: 1 2; opacity: .85; }
 .iterates { fill: currentColor; }
 .iterates circle { transform-box: fill-box; transform-origin: 50% 50%; }
-.star-tail, .star-body, .star-head { fill: none; stroke: #e2ebfa; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
-.star-tail { stroke-width: 1.8; }
-.star-body { stroke-width: 2.6; }
-.star-head { stroke-width: 5.5; }
 /* at rest (no script, reduced motion) only the last run is drawn; with motion, none until its star comes */
 .descent:not(.fly) .run:not(:last-of-type) { display: none; }
 @media (prefers-reduced-motion: no-preference) { .js .descent:not(.fly) :is(.trail, .iterates circle) { opacity: 0; } }
@@ -680,7 +676,7 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
   .calc { gap: var(--s3); }
   .band-img { aspect-ratio: 16 / 9; }
   .band-cap { box-sizing: border-box; left: 8px; bottom: 8px; max-width: calc(100% - 16px); padding: 5px 9px 6px; border-radius: 4px; font-size: 13px; line-height: 1.3; }
-  .descent { -webkit-mask: var(--fade), linear-gradient(transparent 22%, #000 34%); -webkit-mask-composite: source-in;
+  .descent, .comets { -webkit-mask: var(--fade), linear-gradient(transparent 22%, #000 34%); -webkit-mask-composite: source-in;
              mask: var(--fade), linear-gradient(transparent 22%, #000 34%); mask-composite: intersect; }
   .calc, .gets { padding-bottom: var(--s5); }   /* a plate ends close under its last line */
   [data-ui] .ui-table th:nth-child(3), [data-ui] .ui-table td:nth-child(3), [data-ui] .ui-table th:nth-child(6), [data-ui] .ui-table td:nth-child(6) { display: none; }

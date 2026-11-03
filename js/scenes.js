@@ -317,34 +317,85 @@ function pin(sky) {
   sky.setAttribute('viewBox', `${(mx - ax * w).toFixed(1)} ${(my - ay * h).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)}`);
 }
 
-// ---------- the descents' shooting stars: each run is a line its own star draws, one every 6 s, round and round.
-// The head goes out as it reaches the minimum and its tail slides in after it, every tail the same length on
-// screen whatever the run's; as the next star sets off, the track of the one before is wiped. Every timing is
-// worked out from the run's real length, so it lives here rather than in the css ----------
-function flight(sky) {
+// ---------- the descents' shooting stars: each run is a line its own star draws, one every 6 s, round and round;
+// as the next sets off, the track of the one before is wiped. The line and its steps are svg, timed by the Web
+// Animations API from each run's real length. The star is painted on a canvas laid over the drawing, because an
+// svg stroke cannot fade along its length: its tail is drawn back along the run in short segments, each a little
+// thinner and fainter, its colour rising from the line's own blue to white at the head, so it melts into the line
+// it leaves; the head is a small core in a soft glow, and at the minimum it settles and fades while the tail draws
+// in after it. The canvas reads its clock from the line's animation, so the two never drift and pause together ----------
+function flight(sky, canvas) {
   const runs = [...sky.querySelectorAll('.run')];
-  const GAP = 6000, FLY = 3000, WIPE = 800, P = GAP * runs.length, TAIL = 110, BODY = 34;
-  const EDGE = 0.02;              // off the ends of the run by this much while waiting, so no round cap shows
-  let anims = null, held = true;
+  const GAP = 6000, FLY = 3000, WIPE = 800, P = GAP * runs.length, TAIL = 150, GLOW = 9;
+  const LINE = [74, 107, 166], STAR = [240, 246, 255];        // the line's blue, the head's white
+  const ctx = canvas.getContext('2d');
+  // each run sampled once, a point every unit along it
+  const tracks = runs.map(run => {
+    const path = run.querySelector('.trail'), L = path.getTotalLength(), pts = [];
+    for (let s = 0; s <= L; s++) { const q = path.getPointAtLength(s); pts.push([q.x, q.y]); }
+    return { L, pts };
+  });
+  const at = (tr, s) => tr.pts[Math.max(0, Math.min(tr.pts.length - 1, Math.round(s)))];
+  let anims = null, held = true, frame = 0;
+
+  function draw() {
+    const dpr = devicePixelRatio || 1, w = canvas.clientWidth, h = canvas.clientHeight;
+    if (canvas.width !== Math.round(w * dpr) || canvas.height !== Math.round(h * dpr)) {
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const vb = sky.viewBox.baseVal, k = dpr * w / vb.width;          // the drawing's units, as pinned, to pixels
+    ctx.setTransform(k, 0, 0, k, -vb.x * k, -vb.y * k);
+    const now = Number(anims[0].currentTime) || 0;
+    tracks.forEach((tr, i) => {
+      const local = now - i * GAP;
+      if (local < 0) return;
+      const phase = local % P, head = phase / FLY * tr.L;             // the head runs on past the end as it lands
+      const land = TAIL * FLY / tr.L;                                  // the time the tail takes to draw in after it
+      if (phase > FLY + land) return;
+      // the tail: faint and thin where it ends, white and full at the head, in the line's blue on the way
+      for (let s = Math.max(0, head - TAIL); s < Math.min(head, tr.L); s++) {
+        const u = (s - head + TAIL) / TAIL;
+        const c = LINE.map((v, j) => Math.round(v + (STAR[j] - v) * u * u));
+        const [x0, y0] = at(tr, s), [x1, y1] = at(tr, s + 1);
+        ctx.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},${(0.9 * u ** 1.6).toFixed(3)})`;
+        ctx.lineWidth = 0.35 + 2.1 * u ** 1.3;
+        ctx.beginPath();
+        ctx.moveTo(x0, y0);
+        ctx.lineTo(x1, y1);
+        ctx.stroke();
+      }
+      // the head: a small core in a soft glow, settling and fading at the minimum
+      const fade = phase <= FLY ? 1 : 1 - (phase - FLY) / land;
+      const [hx, hy] = at(tr, Math.min(head, tr.L));
+      const glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, GLOW);
+      glow.addColorStop(0, `rgba(${STAR},${(0.4 * fade).toFixed(3)})`);
+      glow.addColorStop(1, `rgba(${STAR},0)`);
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(hx, hy, GLOW, 0, 2 * Math.PI);
+      ctx.fill();
+      ctx.fillStyle = `rgba(${STAR},${fade.toFixed(3)})`;
+      ctx.beginPath();
+      ctx.arc(hx, hy, 1.9, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+    frame = held ? 0 : requestAnimationFrame(draw);
+  }
+
   const begin = () => {
     sky.classList.add('fly');
     anims = runs.flatMap((run, i) => {
-      const trail = run.querySelector('.trail'), L = trail.getTotalLength();
-      const tl = TAIL / L, hit = FLY / P, end = FLY * (1 + tl + EDGE) / P;
+      const trail = run.querySelector('.trail'), hit = FLY / P;
       const timing = { duration: P, delay: i * GAP, iterations: Infinity, fill: 'both' };
       const out = [
         // the run stays until the next sets off, then its track is wiped
         run.animate([{ opacity: 1 }, { opacity: 1, offset: GAP / P }, { opacity: 0, offset: (GAP + WIPE) / P }, { opacity: 0 }], timing),
         // the line grows right behind the head
-        trail.animate([{ strokeDashoffset: 1 + EDGE }, { strokeDashoffset: 0, offset: hit }, { strokeDashoffset: 0 }], timing)
+        trail.animate([{ strokeDashoffset: 1 }, { strokeDashoffset: 0, offset: hit }, { strokeDashoffset: 0 }], timing)
       ];
-      for (const [k, len, glow] of [['tail', tl, 0.22], ['body', BODY / L, 0.5], ['head', 0.001, 1]]) {
-        const el = run.querySelector(`.star-${k}`), gone = len - 1 - tl - EDGE;
-        el.style.strokeDasharray = `${len} 3`;
-        el.style.opacity = glow;
-        out.push(el.animate([{ strokeDashoffset: len + EDGE }, { strokeDashoffset: len - 1, offset: hit },
-          { strokeDashoffset: gone, offset: end }, { strokeDashoffset: gone }], timing));
-      }
       // each step lights as the head reaches it
       for (const c of run.querySelectorAll('.iterates circle')) {
         const f = Number(c.dataset.f) * hit;
@@ -357,7 +408,12 @@ function flight(sky) {
   };
   return {
     start() { if (!anims) begin(); this.hold(held); },
-    hold(on) { held = on; anims?.forEach(a => (on ? a.pause() : a.play())); }
+    hold(on) {
+      held = on;
+      anims?.forEach(a => (on ? a.pause() : a.play()));
+      cancelAnimationFrame(frame);
+      frame = anims && !on ? requestAnimationFrame(draw) : 0;   // held, the canvas keeps the star where it stopped
+    }
   };
 }
 
@@ -368,7 +424,8 @@ if (descent) {
   pin(descent);
   document.fonts?.ready.then(() => pin(descent));   // the headline in its own face moves the offer and the well
 }
-const stars = descent && !reduced ? flight(descent) : null;
+const comets = document.querySelector('.hero .comets');
+const stars = descent && comets && !reduced ? flight(descent, comets) : null;
 if (top) stages.push(hero(top, stars));
 document.querySelectorAll('[data-stage="fig"]').forEach(root => stages.push(figure(root)));
 
