@@ -18,6 +18,35 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const json = (s, d) => { try { return JSON.parse(s); } catch { return d; } };
 
+// the cheapest assignment (Kuhn and Munkres): cost[i][j] for row i taking column j; returns each row's column
+function assign(cost) {
+  const n = cost.length, u = Array(n + 1).fill(0), v = Array(n + 1).fill(0), p = Array(n + 1).fill(0), way = Array(n + 1).fill(0);
+  for (let i = 1; i <= n; i++) {
+    p[0] = i;
+    let j0 = 0;
+    const low = Array(n + 1).fill(Infinity), used = Array(n + 1).fill(false);
+    do {
+      used[j0] = true;
+      const i0 = p[j0];
+      let delta = Infinity, j1 = 0;
+      for (let j = 1; j <= n; j++) {
+        if (used[j]) continue;
+        const c = cost[i0 - 1][j - 1] - u[i0] - v[j];
+        if (c < low[j]) { low[j] = c; way[j] = j0; }
+        if (low[j] < delta) { delta = low[j]; j1 = j; }
+      }
+      for (let j = 0; j <= n; j++) {
+        if (used[j]) { u[p[j]] += delta; v[j] -= delta; } else low[j] -= delta;
+      }
+      j0 = j1;
+    } while (p[j0] !== 0);
+    do { const j1 = way[j0]; p[j0] = p[j1]; j0 = j1; } while (j0);
+  }
+  const row = Array(n);
+  for (let j = 1; j <= n; j++) row[p[j] - 1] = j - 1;
+  return row;
+}
+
 class Stage {
   constructor(root) {
     this.root = root;
@@ -109,52 +138,256 @@ class Stage {
     return el;
   }
 
-  // the furniture of a new scene comes in as the old one goes
-  swap(fx, phase) {
+  // the furniture of a new scene: the old goes at once, as the marks leave; the new comes in after `late` ms,
+  // as they land
+  swap(fx, phase, late = 0) {
     const old = [...this.fx.children];
     const fresh = fx.map(f => this.make(f));
     old.forEach(el => el.classList.add('is-out'));
     fresh.forEach(el => { el.classList.add('is-new'); this.fx.append(el); });
     this.fx.dataset.phase = phase;
-    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => {
+    setTimeout(() => old.forEach(el => el.remove()), 380);
+    return new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(() => {
       fresh.forEach(el => el.classList.remove('is-new'));
-      setTimeout(() => { old.forEach(el => el.remove()); resolve(); }, 280);
-    })));
+      resolve();
+    }, late))));
   }
 
-  move(points, ms) {
+  // where a mark is now, mid-move if it is moving
+  now(g) {
+    const m = new DOMMatrix(getComputedStyle(g).transform);
+    return { x: m.e, y: m.f, s: Math.hypot(m.a, m.b) };
+  }
+
+  // how high a mark must be carried, going from a to b, to pass over every block that stands in its way (0: the
+  // way is clear). The blocks in the way are those whose column it crosses, short of where it starts and ends;
+  // a block on top of where it starts, or of where it lands, is not in the way (it goes first, or comes after)
+  clearance(a, b, others) {
+    const m = this.L.m, lo = Math.min(a.x, b.x), hi = Math.max(a.x, b.x);
+    const over = (o, p) => Math.abs(o.x - p.x) < m * 0.5 && o.y < p.y;
+    let H = 0;
+    for (const o of others) {
+      if (o.x < lo - m * 0.9 || o.x > hi + m * 0.9 || over(o, a) || over(o, b)) continue;
+      if (Math.hypot(o.x - a.x, o.y - a.y) < m * 0.6 || Math.hypot(o.x - b.x, o.y - b.y) < m * 0.6) continue;
+      const u = hi - lo > 1 ? (o.x - a.x) / (b.x - a.x) : 0.5;
+      const y = a.y + (b.y - a.y) * Math.min(1, Math.max(0, u));
+      H = Math.max(H, y - (o.y - m * (o.s || 1) * 1.15));
+    }
+    return H > 0 ? Math.max(H, m * 0.7) : 0;
+  }
+
+  /* Move the marks to points, the way a hand moves blocks. A block with a clear way slides; a block with
+     another in its way is picked up, carried over high enough to clear it, a little nearer the eye (larger,
+     and painted over the rest), and set down. Each takes a time that grows with its way, under one gentle
+     in-out, so nothing leaves at a jolt.
+       'scene': the whole set goes to a new scene, a ripple across the stage in the order the places fill
+                (left to right, each column from the bottom), each block on a low arc;
+       'resolve': the model's moves, one after another in the order the places fill, the blocks that only
+                slide going together so the ones in a row keep their order.
+     A block that stops being waste changes colour as it lands. Resolves when every block is down. */
+  move(points, { mode = 'resolve' } = {}) {
     this.halt();
-    return Promise.all(this.marks.map((g, i) => {
-      const p = points[i], to = transform(p);
-      const from = g.style.transform || getComputedStyle(g).transform;
-      const delay = Math.min(i * 20, 340);
-      if (p.w !== g.classList.contains('is-w')) setTimeout(() => g.classList.toggle('is-w', p.w), delay + ms * 0.4);
-      if (from === to) return null;
-      const a = g.animate([{ transform: from }, { transform: to }], { duration: ms, delay, easing: EASE, fill: 'forwards' });
-      g.move = a;
-      return a.finished.then(() => { g.style.transform = to; a.cancel(); if (g.move === a) g.move = null; }, () => {});
-    }));
+    const all = this.pair(points, mode), goes = all.filter(k => k.go);
+    this.plan(goes, all.filter(k => !k.go).map(k => k.a), mode);
+    // carried blocks are painted over the rest, the last to leave on top
+    const parent = this.marks[0].parentNode;
+    [...goes].sort((p, q) => p.lift - q.lift || p.delay - q.delay).forEach(k => parent.append(k.g));
+    this.landing = goes.length ? Math.min(...goes.map(k => k.delay + k.dur * 0.6)) : 0;
+    // a carry eases in its own shape (up, across, down), so its clock runs even; a slide eases on a sine
+    return Promise.all(goes.map(k => this.fly(k.g, this.carry(k), k.b, k.dur, k.delay, k.lift ? t => t : undefined)));
   }
 
-  // the routes of the model draw themselves in; today's stay behind them, faint
-  drawRoutes() {
-    for (const el of this.fx.querySelectorAll('.fx-route:not(.is-w)')) {
-      const len = el.getTotalLength();
-      el.style.strokeDasharray = `${len} ${len}`;
-      el.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 950, easing: EASE });
+  /* Who goes where. The blocks are alike, so the ones that move may trade places: within a kind (a new scene:
+     all of them; the model's moves: waste put to use, work that shifts, ...) each place goes to the block that
+     makes the ways, all told, shortest, so no two ways cross for nothing. The stage then knows each block by
+     its new place. */
+  pair(points, mode) {
+    const dist = (p, q) => Math.hypot(q.x - p.x, q.y - p.y);
+    const all = this.marks.map((g, i) => ({ g, j: i, a: this.now(g), b: points[i], w: g.classList.contains('is-w') }));
+    const kinds = new Map();
+    for (const k of all) {
+      k.go = dist(k.a, k.b) > 0.5 || Math.abs(k.b.s - k.a.s) > 0.01;
+      if (!k.go) {
+        if (k.b.w !== k.w) k.g.classList.toggle('is-w', k.b.w);
+        continue;
+      }
+      const kind = mode === 'scene' ? '' : `${k.w}${k.b.w}`;
+      kinds.set(kind, [...(kinds.get(kind) || []), k]);
+    }
+    // and, where two are carried from one column to another, the one taken first (the upper) goes to the lower
+    // place, so it can be set down first (a column that only shifts slides whole, in its own order)
+    const m = this.L.m, col = (p, q) => Math.abs(p.x - q.x) < m * 0.5;
+    const across = k => this.L.stack && Math.abs(k.b.x - k.a.x) > m * 1.5;
+    for (const group of kinds.values()) {
+      const places = group.map(k => [k.b, k.j]), to = assign(group.map(k => places.map(([b]) => dist(k.a, b))));
+      group.forEach((k, i) => { [k.b, k.j] = places[to[i]]; });
+      for (let swapped = true, n = 0; swapped && n < 20; n++) {
+        swapped = false;
+        for (const k of group) {
+          for (const o of group) {
+            if (o !== k && across(k) && across(o) && col(o.a, k.a) && o.a.y < k.a.y && col(o.b, k.b) && o.b.y < k.b.y) {
+              [k.b, k.j, o.b, o.j] = [o.b, o.j, k.b, k.j];
+              swapped = true;
+            }
+          }
+        }
+      }
+    }
+    const order = [];
+    for (const k of all) order[k.j] = k.g;
+    this.marks = order;
+    return all;
+  }
+
+  /* How each goes. A block with something in its way, or a long way to go, is carried (lift); the rest
+     slide. Carried blocks go one after another in the order the places fill (a new scene: a ripple left to
+     right, each column from the bottom; the model's moves: lower places first); sliders go together, so in
+     a row none passes another, or, side by side, in a ripple. A block is taken only once the one on top of it
+     has gone, and set down only once the one under it is down. In a stack the carry rises over what stands in
+     its way when it passes (kept inside the stage); in a plan it rises towards the eye. */
+  plan(goes, still, mode) {
+    const scene = mode === 'scene';
+    goes.sort(scene ? (p, q) => p.b.x - q.b.x || q.b.y - p.b.y : (p, q) => q.b.y - p.b.y || p.b.x - q.b.x);
+    this.lifts(goes, still, scene);
+    for (const k of goes) {
+      const d = Math.hypot(k.b.x - k.a.x, k.b.y - k.a.y);
+      if (!k.lift) k.dur = Math.min(800, Math.max(420, 300 + d * 0.6));
+      else if (scene) k.dur = Math.min(1150, Math.max(440, 320 + d * 0.7));
+      else k.dur = Math.min(1150, Math.max(560, 440 + d * 0.55));
+    }
+    this.timing(goes, scene);
+    this.heights(goes, still);
+  }
+
+  // which blocks are carried: those with something in the way (in a stack, what stands there now or after; in
+  // a plan, only what does not move), waste going far, and in a new scene any long way; then sliders that
+  // would run into each other
+  lifts(goes, still, scene) {
+    const m = this.L.m;
+    for (const k of goes) {
+      const others = this.L.stack ? [...still, ...goes.filter(o => o !== k).flatMap(o => [o.a, o.b])] : still;
+      const far = Math.abs(k.b.x - k.a.x) > m * 2, long = Math.hypot(k.b.x - k.a.x, k.b.y - k.a.y) > m * 2.5;
+      k.lift = this.clearance(k.a, k.b, others) > 0 || (far && (k.w || (scene && long)));
+    }
+    this.untangle(goes);
+  }
+
+  // when each goes: the carried in turn, the sliders together once what is in their way has lifted off; the
+  // block on top is taken first and the one below set down first; a carry landing where a slider starts, or
+  // passes, stays up until the slider is by
+  timing(goes, scene) {
+    const m = this.L.m, carried = goes.filter(k => k.lift), slid = goes.filter(k => !k.lift);
+    const gap = scene ? 30 : Math.min(130, 900 / Math.max(1, carried.length));
+    carried.forEach((k, r) => { k.delay = r * gap; });
+    const rows = slid.some(k => Math.abs(k.b.x - k.a.x) > m * 0.5), sdur = Math.max(0, ...slid.map(k => k.dur));
+    const inWay = o => slid.some(k => Math.abs(o.a.y - k.a.y) < m * 0.6 && o.a.x > Math.min(k.a.x, k.b.x) - m * 0.6 && o.a.x < Math.max(k.a.x, k.b.x) + m * 0.6);
+    const off = Math.max(carried.length && !scene ? 160 : 0, ...carried.filter(inWay).map(o => o.delay + o.dur * 0.3));
+    slid.sort((p, q) => p.a.x - q.a.x).forEach((k, r) => Object.assign(k, { dur: sdur, delay: off + (rows ? 0 : r * 55) }));
+    const on = (p, q) => Math.abs(p.x - q.x) < m * 0.5 && q.y - p.y > 0 && q.y - p.y < m * 1.7;   // p sits on q
+    for (let pass = 0; pass < 3; pass++) {
+      for (const k of carried) {
+        for (const o of goes.filter(g => g !== k)) {
+          if (on(o.a, k.a)) k.delay = Math.max(k.delay, o.delay + 120);
+          if (on(k.b, o.b)) k.delay = Math.max(k.delay, o.delay + o.dur + 60 - k.dur);
+        }
+      }
+    }
+    const passes = (o, p) => {
+      const dx = o.b.x - o.a.x, dy = o.b.y - o.a.y, l2 = dx * dx + dy * dy || 1;
+      const u = Math.min(1, Math.max(0, ((p.x - o.a.x) * dx + (p.y - o.a.y) * dy) / l2));
+      return Math.hypot(o.a.x + dx * u - p.x, o.a.y + dy * u - p.y) < m * 0.9 && Math.hypot(o.b.x - p.x, o.b.y - p.y) > m * 0.9;
+    };
+    for (const k of carried) {
+      const clear = Math.max(0, ...slid.filter(o => passes(o, k.b)).map(o => o.delay + o.dur * 0.8 + 40));
+      k.dur = Math.max(k.dur, clear - k.delay);
     }
   }
 
-  // one scene: its furniture, the marks as they stand today, a pause, then the model's plan
+  // how high each carry goes, in a stack: over what still stands, and what is already down, when it passes,
+  // kept inside the stage (in a plan, a carry rises towards the eye instead)
+  heights(goes, still) {
+    const m = this.L.m;
+    for (const k of goes) {
+      k.H = 0;
+      if (!k.lift || !this.L.stack) continue;
+      const mid = k.delay + k.dur / 2, then = goes.filter(o => o !== k).map(o => (o.delay + o.dur * 0.6 < mid ? o.b : o.a));
+      const H = this.clearance(k.a, k.b, [...still, ...then]) || m * 0.6;
+      k.H = Math.max(0, Math.min(H, Math.min(k.a.y, k.b.y) - m * 0.75));
+    }
+  }
+
+  // sliders that would pass through one another, moving together, are carried instead: the longer way of each pair
+  untangle(goes) {
+    const m = this.L.m * 0.9, at = (k, u) => [k.a.x + (k.b.x - k.a.x) * u, k.a.y + (k.b.y - k.a.y) * u];
+    const clash = (p, q) => {
+      for (let u = 0.05; u < 1; u += 0.05) {
+        const [px, py] = at(p, u), [qx, qy] = at(q, u);
+        if (Math.abs(px - qx) < m && Math.abs(py - qy) < m) return true;
+      }
+      return false;
+    };
+    const len = k => Math.hypot(k.b.x - k.a.x, k.b.y - k.a.y);
+    for (let n = 0; n < goes.length; n++) {
+      const slid = goes.filter(k => !k.lift);
+      const pair = slid.flatMap(p => slid.filter(q => q !== p && clash(p, q)).map(q => [p, q]))[0];
+      if (!pair) return;
+      const [p, q] = pair;
+      (len(p) >= len(q) ? p : q).lift = true;
+    }
+  }
+
+  // a way from a to b: straight; or carried: up (in a stack, H over the others) or towards the eye, across, down
+  // (the lift and the set-down take about 0.3 s however long the carry, so one that waits up does not crawl)
+  carry({ a, b, H, lift, dur }) {
+    const ss = v => { v = Math.min(1, Math.max(0, v)); return v * v * (3 - 2 * v); };
+    const r = Math.min(0.28, 300 / dur), e = Math.min(0.1, 120 / dur);
+    return u => {
+      const v = lift ? ss((u - e) / (1 - 2 * e)) : u, up = lift ? ss(u / r) * ss((1 - u) / r) : 0;
+      return { x: a.x + (b.x - a.x) * v, y: a.y + (b.y - a.y) * v - H * up, s: (a.s + (b.s - a.s) * v) * (1 + (H ? 0.1 : 0.16) * up) };
+    };
+  }
+
+  // send a mark along a way (u from 0 to 1 -> {x, y, s}) in ms, under a sine in-out; it lands on `to`
+  fly(g, way, to, ms, delay, ease = t => 0.5 - Math.cos(Math.PI * t) / 2) {
+    const K = 24, frames = [];
+    for (let k = 0; k <= K; k++) {
+      const p = way(ease(k / K));
+      frames.push({ transform: transform({ x: p.x, y: p.y, r: to.r, s: p.s }) });
+    }
+    frames[K].transform = transform(to);
+    if (to.w !== g.classList.contains('is-w')) setTimeout(() => g.classList.toggle('is-w', to.w), delay + ms * 0.88);
+    const a = g.animate(frames, { duration: ms, delay, easing: 'linear', fill: 'forwards' });
+    g.move = a;
+    return a.finished.then(() => { g.style.transform = frames[K].transform; a.cancel(); if (g.move === a) g.move = null; }, () => {});
+  }
+
+  // the cost curve's descent: every mark slides down the curve together, keeping its order, until they lie side
+  // by side at its foot (the layout gives each mark's place along the way)
+  descend(slide, via) {
+    this.halt();
+    return Promise.all(this.marks.map((g, i) => this.fly(g, u => { const [x, y] = slide(i, u); return { x, y, s: 1 }; }, via[i], 1150, 0,
+      t => (t < 0.5 ? 2 * t * t : 1 - (2 - 2 * t) ** 2 / 2))));
+  }
+
+  // the routes of the model draw themselves in, one after another; today's stay behind them, faint
+  drawRoutes() {
+    [...this.fx.querySelectorAll('.fx-route:not(.is-w)')].forEach((el, i) => {
+      const len = el.getTotalLength();
+      el.style.strokeDasharray = `${len} ${len}`;
+      el.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], { duration: 950, delay: i * 140, easing: EASE, fill: 'backwards' });
+    });
+  }
+
+  // one scene: the marks go to where they stand today as its furniture comes in, a pause, then the model's plan
   async play(name, { hold = 1100 } = {}) {
     const t = ++this.token;
     this.parkTruck(false);
     this.scene = name;
     this.L = this.lay(name);
     this.size(this.L.m);
-    await this.swap(this.L.fx, 'before');
-    if (t !== this.token) return false;
-    await this.move(this.L.before, 720);
+    const moving = this.move(this.L.before, { mode: 'scene' });
+    await this.swap(this.L.fx, 'before', this.landing);
+    await moving;
     if (t !== this.token) return false;
     await wait(hold);
     if (t !== this.token) return false;
@@ -165,7 +398,11 @@ class Stage {
     this.phase = 'after';
     this.fx.dataset.phase = 'after';
     this.drawRoutes();
-    await this.move(this.L.after, 860);
+    if (this.L.via) {
+      await this.descend(this.L.slide, this.L.via);
+      if (t !== this.token) return false;
+    }
+    await this.move(this.L.after);
     if (t !== this.token) return false;
     if (this.scene === 'rutas' && this.truck && this.L.drive) {
       await wait(250);
@@ -226,8 +463,13 @@ function hero(root, stars) {
       await go();
       if (mine !== run) return;
       say(name);
-      const ok = name === 'rutas' && stage.scene === 'rutas' && stage.phase === 'before'
-        ? await stage.resolve() : await stage.play(name);
+      let ok;
+      if (name === 'rutas' && stage.scene === 'rutas' && stage.phase === 'before') {
+        await wait(1500);          // today's routes, long enough to see what the model will change
+        await go();
+        if (mine !== run) return;
+        ok = await stage.resolve();
+      } else ok = await stage.play(name);
       if (!ok || mine !== run) return;
       await wait(holds[name]);
     }

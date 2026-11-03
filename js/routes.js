@@ -120,16 +120,16 @@ if (fig) {
     specs.setAttribute('aria-busy', 'true');
     const { pts, lines } = draw(day, res.naive, res.naive);
     show(res.naiveKm, res.naiveKm, false);
-    // the plan by hand draws in
-    for (const l of lines) {
+    // the plan by hand draws in, a truck at a time
+    lines.forEach((l, i) => {
       const len = l.getTotalLength();
       l.style.strokeDasharray = String(len);
       l.style.strokeDashoffset = String(len);
       l.getBoundingClientRect();
-      l.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.22, 1, .36, 1)';
+      l.style.transition = `stroke-dashoffset 1.2s cubic-bezier(.22, 1, .36, 1) ${(i * 0.12).toFixed(2)}s`;
       l.style.strokeDashoffset = '0';
-    }
-    await wait(1500);
+    });
+    await wait(1500 + lines.length * 120);
     if (mine !== token) return;
     for (const l of lines) { l.style.transition = ''; l.style.strokeDasharray = ''; l.style.strokeDashoffset = ''; l.classList.add('is-model'); }
 
@@ -137,10 +137,23 @@ if (fig) {
     const all = res.steps.slice(1);
     const steps = all.length <= 14 ? all : Array.from({ length: 14 }, (_, i) => all[Math.round((i + 1) * all.length / 14) - 1]);
     const dt = Math.max(200, Math.min(420, 3000 / Math.max(1, steps.length)));
+    // each plan the search accepts replaces the last, which lingers a moment as a fading trace, so the eye sees
+    // what changed: the routes untangle step by step instead of jumping
+    const trace = l => {
+      const c = l.cloneNode();
+      c.classList.add('is-trace');
+      l.parentNode.insertBefore(c, l.parentNode.firstChild);
+      c.animate([{ opacity: 0.5 }, { opacity: 0 }], { duration: 560, easing: 'ease-out', fill: 'forwards' }).finished.then(() => c.remove(), () => c.remove());
+    };
     for (const plan of steps) {
       await wait(dt);
       if (mine !== token) return;
-      plan.forEach((r, k) => lines[k].setAttribute('points', points(pts, r)));
+      plan.forEach((r, k) => {
+        const p = points(pts, r);
+        if (lines[k].getAttribute('points') === p) return;
+        trace(lines[k]);
+        lines[k].setAttribute('points', p);
+      });
       show(res.naiveKm, planKm(res.D, plan), false);
     }
     show(res.naiveKm, res.bestKm, true);

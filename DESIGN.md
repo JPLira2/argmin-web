@@ -125,7 +125,9 @@ problem and the way out.
 
 The page proves instead of claiming. The route solve and the stock calculator run in the browser on the
 visitor's screen, and the product appears as real fragments of its tools with example data, labelled as
-such. Photographs are documentary and greyscale, one treatment for every picture.
+such. In the solve, the plan by hand draws in a truck at a time, and each plan the search accepts leaves the
+last behind as a fading trace, so the routes are seen to untangle step by step rather than jump. Photographs
+are documentary and greyscale, one treatment for every picture.
 
 The house lint's flat rules (no shadows or gradients at rest) are overridden here on purpose: the founders
 asked for depth on 2 November 2026, after the flat version read like slides. Every shadow and gradient below
@@ -286,11 +288,25 @@ type.
 
 18 blocks over a scene's furniture (a target bar, day columns, supplier lanes, the cost curve, routes). Every
 scene has two moments: today, with what is lost in turquoise, and the model's plan. The blocks are the same
-objects in every scene and move between arrangements (0.72 s in, 0.86 s to the plan, 20 ms stagger, ease
-`cubic-bezier(.22, 1, .36, 1)`). A block is as deep as a quarter of a mark, less than the smallest gap between
-two marks, so neighbours never cover each other. The hero's stage is a well sunk into its plate and plays the
-day once, with Rutas, Stock and Turnos buttons and a pause; each service's stage is a tray pressed into the
-desk that plays each time it comes into view. Reduced motion shows every scene finished.
+objects in every scene and move between arrangements the way a hand moves blocks, never through one another:
+- a block with a clear way slides (a sine in-out, 0.42 to 0.8 s by distance); a block with another in its way,
+  or waste being carried off, is picked up, carried and set down: in a stack scene (Stock, Turnos, Mínimo) up
+  and over what stands in its way, kept inside the stage; in a plan scene (Compras, Producción, Rutas) towards
+  the eye, a sixth larger, passing over. Lift and set-down take about 0.3 s whatever the carry's length;
+- the blocks are alike, so the ones that move trade places for the shortest ways all told; a block is taken
+  only once the one on top of it has gone and set down only once the one under it is down; sliders in a row
+  go together, so none passes another, and set off once what is in their way has lifted off;
+- a new scene is a ripple across the stage, columns built left to right from the bottom, its furniture
+  fading in as the blocks land; the model's moves go one after another, lower places first; waste turns to
+  the plan's colour as it lands;
+- Mínimo is the descent itself: every block slides down the cost curve together, in order, to its foot,
+  then the pile is stacked from the bottom row up.
+
+A block is as deep as a quarter of a mark, less than the smallest gap between two marks, so neighbours never
+cover each other at rest. The hero's stage is a well sunk into its plate and plays the day once, holding
+today's routes 1.5 s before the model's draw in, a truck at a time, with Rutas, Stock and Turnos buttons and a
+pause; each service's stage is a tray pressed into the desk that plays each time it comes into view. Any move
+can be interrupted: the next starts from wherever the blocks are. Reduced motion shows every scene finished.
 
 ### Product fragments
 
