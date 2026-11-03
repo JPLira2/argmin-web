@@ -62,8 +62,8 @@ export default function page(c, x) {
   // minimum; each run is a line its own shooting star draws (js/scenes.js sets them flying), its steps lighting
   // as the star passes ----------
   const sky = x.descent;
-  const run = p => `<g class="run"><path class="trail" pathLength="1" d="${p.d}"/>`
-    + `<g class="iterates">${p.dots.map(([cx, cy, f]) => `<circle cx="${cx}" cy="${cy}" r="1.8" data-f="${f}"/>`).join('')}</g>`
+  const run = p => `<g class="run" data-f="${p.f.join(' ')}" data-t="${p.t.join(' ')}"><path class="trail" pathLength="1" d="${p.d}"/>`
+    + `<g class="iterates">${p.dots.map(([cx, cy, f]) => `<circle cx="${cx}" cy="${cy}" r="1.8" data-t="${f}"/>`).join('')}</g>`
     + '</g>';
   const descent = `<svg class="descent" viewBox="0 0 ${sky.W} ${sky.H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-w="${sky.W}" data-h="${sky.H}" data-min="${sky.min.join(' ')}">`
     + `<image class="descent-map" href="${x.up}assets/descent-map.svg" width="${sky.W}" height="${sky.H}"/>` + sky.paths.map(run).join('')

@@ -143,12 +143,17 @@ belongs to the depth system; none is decoration.
   index contour at twice the weight, each run a smooth trajectory through its steps. It fades out towards
   the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting
   star draws, its steps lighting as the star passes: one every 6 s, round and round, and as the next sets off
-  the last one's track is wiped, so one run shows at a time. The star is painted on a canvas over the drawing,
-  since an svg stroke cannot fade along its length: its tail tapers from a hairline to full width and rises from
-  the line's own blue to white at the head, so it melts into the line it leaves; the head is a small core in a
-  soft glow that settles and fades at the minimum while the tail draws in after it. At rest (no script, reduced motion) the last run
-  shows. The lowest point, one small point, sits in the clear between the offer and the scene's well, at every
-  size.
+  the last one's track is wiped, so one run shows at a time. The runs come in through the open pocket right of
+  and below the offer, from the right edge or rising from behind the scene's well, and never cross its words.
+  The star keeps the descent's own time: it reaches the steps one beat after another, so it runs fast down the
+  long first steps and slows as they shrink, settling into the minimum as the descent does, its speed changing
+  smoothly between steps. It is painted on a canvas over the drawing, since an svg stroke cannot fade along its
+  length: its tail is one tapered ribbon under one gradient, a hairline where it ends and full at the head,
+  rising from the line's own blue to white, and as long as the star is fast, so it shortens as the star slows;
+  the head is a small core in a soft glow that fades at the minimum while the tail draws in after it. The last
+  zig-zags crowd the minimum, so a step is marked only where it stands clear of the one before. At rest (no
+  script, reduced motion) the last run shows. The lowest point, one small point, sits in the clear between the
+  offer and the scene's well, at every size.
 - The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.
 - Display type is one ink, uppercase, never with an accented word.
 - Motion explains a state change. Where the browser ties animation to the scroll, the hero sinks back as you

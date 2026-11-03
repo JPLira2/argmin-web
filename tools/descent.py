@@ -41,7 +41,11 @@ FEATURES = [
     (-1.15, 1018, 334, 190, 70, -8),          # the trough the descents come down, just short of the minimum
 ]
 CENTRE = (1075.0, 323.0)                      # the funnel's centre; the true minimum is found below
-STARTS = [(1268, 22), (980, 0), (1268, 250), (1268, 470)]   # in the order the page flies them; the last stays at rest
+# in the order the page flies them; the last stays at rest. All four come in through the open pocket right of and
+# below the hero's words (none crosses them at any width): from the upper right, from behind the stage on the right,
+# rising from behind it on the left, and straight in from the right
+STARTS = [(1268, 150), (1268, 540), (1020, 768), (1268, 330)]
+PACE = 0.45                                    # a step takes time as its length to this power: long steps go fast, short ones slow
 LR = 5000.0                                    # across the trough, 1.4 times the step that lands on its floor: a few zig-zags, then it settles
 LEVELS, INDEX = 35, 5                          # the level sets, and every fifth an index contour
 
@@ -121,6 +125,16 @@ def length(seg, k=16):
     return sum(math.dist(a, b) for a, b in zip(q, q[1:]))
 
 
+def clock(pts):
+    # when the star reaches each step, as a share of its flight: one step per beat, a long step taking a little
+    # longer than a short one but far less than its length, so the star slows as the steps shrink, as the descent does
+    beats = [length(seg) ** PACE for seg in segments(pts, False)]
+    t = [0.0]
+    for b in beats:
+        t.append(t[-1] + b)
+    return [v / t[-1] for v in t]
+
+
 def along(pts):
     # each step's place along its run, measured on the curve that is drawn
     cum = [0.0]
@@ -144,8 +158,25 @@ for k, lv in enumerate(levels):
         (index if k % INDEX == INDEX - 1 else thin).append(curve(pts, closed))
 
 on = lambda x, y: -12 < x < W + 12 and -12 < y < H + 12
+GAP = 6                                        # a step is marked only this far from the last mark and the minimum
+
+
+def marks(p):
+    # the steps to draw, with the moment each lights; the last zig-zags crowd the minimum, so a step closer than
+    # GAP to the one marked before it, or to the minimum, goes unmarked rather than piling into a bead
+    out, last = [], None
+    for (x, y), t in zip(p[1:-1], clock(p)[1:-1]):
+        if on(x, y) and math.dist((x, y), MIN) >= GAP and (last is None or math.dist((x, y), last) >= GAP):
+            out.append([round(x, 1), round(y, 1), round(t, 4)])
+            last = (x, y)
+    return out
+
+
 drawing = {'W': W, 'H': H, 'min': [round(MIN[0], 1), round(MIN[1], 1)],
-           'paths': [{'d': curve(p), 'dots': [[round(x, 1), round(y, 1), round(t, 3)] for (x, y), t in zip(p[1:-1], along(p)[1:-1]) if on(x, y)]}
+           # each run: its curve; where each step falls along it (f) and when the star reaches it (t), both 0 to 1;
+           # and the steps to draw, with the moment each one lights
+           'paths': [{'d': curve(p), 'f': [round(v, 4) for v in along(p)], 't': [round(v, 4) for v in clock(p)],
+                      'dots': marks(p)}
                      for p in paths]}
 (root / 'src' / 'descent.json').write_text(json.dumps(drawing, separators=(',', ':')) + '\n', encoding='utf-8')
 
