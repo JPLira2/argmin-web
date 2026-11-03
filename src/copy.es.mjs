@@ -39,7 +39,7 @@ export default {
       produccion: ['Producción.', 'Menos cambios de línea, más pedidos en el turno.']
     },
     tabs: [['rutas', 'Rutas'], ['stock', 'Stock'], ['turnos', 'Turnos']],
-    pause: { on: 'Pausar', off: 'Seguir', again: 'Ver de nuevo' },
+    pause: { on: 'Pausar', off: 'Seguir' },
     key: ['Lo que hoy se pierde', 'El plan del modelo'],
     labels: {
       turnos: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],

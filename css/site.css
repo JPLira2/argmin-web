@@ -11,16 +11,16 @@
 
 /* ---------- fonts (self-hosted, OFL) ---------- */
 @font-face { font-family: "Sofia Sans"; font-style: normal; font-weight: 400 600; font-display: swap;
-  src: url(/assets/fonts/sofia-sans-latin.woff2) format("woff2");
+  src: url(../assets/fonts/sofia-sans-latin.woff2) format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Sofia Sans"; font-style: normal; font-weight: 400 600; font-display: swap;
-  src: url(/assets/fonts/sofia-sans-latin-ext.woff2) format("woff2");
+  src: url(../assets/fonts/sofia-sans-latin-ext.woff2) format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 @font-face { font-family: "Sofia Sans Extra Condensed"; font-style: normal; font-weight: 900; font-display: swap;
-  src: url(/assets/fonts/sofia-sans-extra-condensed-latin.woff2) format("woff2");
+  src: url(../assets/fonts/sofia-sans-extra-condensed-latin.woff2) format("woff2");
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
 @font-face { font-family: "Sofia Sans Extra Condensed"; font-style: normal; font-weight: 900; font-display: swap;
-  src: url(/assets/fonts/sofia-sans-extra-condensed-latin-ext.woff2) format("woff2");
+  src: url(../assets/fonts/sofia-sans-extra-condensed-latin-ext.woff2) format("woff2");
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
 /* ---------- palette: roles ---------- */
@@ -157,8 +157,8 @@ html:not(.js) .top { position: absolute; }   /* without script it never takes a 
 .hero, .gets, .contact, .menu { position: relative; isolation: isolate; background: var(--lit), var(--b); color: var(--b-ink); }
 .contact::before, .menu::before {
   content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none; background: var(--b-4); opacity: .65;
-  -webkit-mask: url(/assets/descent.svg) 84% 42% / cover no-repeat, var(--fade); -webkit-mask-composite: source-in;
-  mask: url(/assets/descent.svg) 84% 42% / cover no-repeat, var(--fade); mask-composite: intersect; }
+  -webkit-mask: url(../assets/descent.svg) 84% 42% / cover no-repeat, var(--fade); -webkit-mask-composite: source-in;
+  mask: url(../assets/descent.svg) 84% 42% / cover no-repeat, var(--fade); mask-composite: intersect; }
 .contact::before { -webkit-mask-position: 84% 30%, 0 0; mask-position: 84% 30%, 0 0; opacity: .5; }
 .menu { --fade: linear-gradient(to right, transparent 62%, #000 92%); }
 
@@ -170,38 +170,19 @@ html:not(.js) .top { position: absolute; }   /* without script it never takes a 
 /* the lowest point: a small ring a step lighter than the map, and its core */
 .descent-min { fill: none; stroke: #7894c8; stroke-width: 2; }
 .descent-core { fill: #8fa9d8; }
-/* each run is a line drawn by its own shooting star: the line grows behind a bright head and a fading tail, and
-   each step lights as the head passes. One sets off every 6 s as the day begins and flies for 3 s; as the next
-   sets off, the last one's track is wiped, and the final run stays. js/scenes.js gives each step its place along
-   its run (--f) */
-.run { --at: 0s; }
-.run:nth-of-type(2) { --at: 6s; }
-.run:nth-of-type(3) { --at: 12s; }
-.run:nth-of-type(4) { --at: 18s; }
-.trail { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-dasharray: 1 1; opacity: .85; }
+/* each run is a line drawn by its own shooting star, round and round: the line grows behind a bright head and a
+   tail, each step lights as the head passes, and as the next star sets off the track before it is wiped.
+   js/scenes.js times it all from each run's length; here only how it looks, and how it rests */
+.trail { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linejoin: round; stroke-dasharray: 1 2; opacity: .85; }
 .steps { fill: currentColor; }
 .steps circle { transform-box: fill-box; transform-origin: 50% 50%; }
-.star-tail, .star-body, .star-head { fill: none; stroke: #e2ebfa; stroke-linecap: round; stroke-linejoin: round;
-                                     stroke-dasharray: var(--len) 3; stroke-dashoffset: var(--len); opacity: 0; }
-.star-tail { --len: .3; --glow: .22; stroke-width: 1.8; }
-.star-body { --len: .1; --glow: .5; stroke-width: 2.6; }
-.star-head { --len: .001; --glow: 1; stroke-width: 5.5; }
-/* at rest (no script, reduced motion) only the run that stays is drawn; with motion, none until its star comes */
+.star-tail, .star-body, .star-head { fill: none; stroke: #e2ebfa; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.star-tail { stroke-width: 1.8; }
+.star-body { stroke-width: 2.6; }
+.star-head { stroke-width: 5.5; }
+/* at rest (no script, reduced motion) only the last run is drawn; with motion, none until its star comes */
 .descent:not(.fly) .run:not(:last-of-type) { display: none; }
 @media (prefers-reduced-motion: no-preference) { .js .descent:not(.fly) :is(.trail, .steps circle) { opacity: 0; } }
-.fly .trail { animation: draw 3s linear var(--at) both; }
-.fly :is(.star-tail, .star-body, .star-head) { animation: star 3s linear var(--at) both; }
-.fly .steps circle { animation: lit .9s cubic-bezier(.2, .6, .3, 1) calc(var(--at) + var(--f, 0) * 3s) both; }
-.fly .run:not(:last-of-type) { animation: wipe .8s ease-in calc(var(--at) + 6s) both; }
-.descent.is-away :is(.run, .run *), .hero:has(.stage-pause[aria-pressed="true"]) :is(.run, .run *) { animation-play-state: paused; }
-@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
-@keyframes star {
-  0% { stroke-dashoffset: var(--len); opacity: 0; }
-  5%, 88% { opacity: var(--glow); }
-  100% { stroke-dashoffset: calc(var(--len) - 1); opacity: 0; }
-}
-@keyframes lit { from { opacity: 0; transform: scale(0); } 35% { opacity: 1; transform: scale(1.7); } to { opacity: 1; transform: scale(1); } }
-@keyframes wipe { to { opacity: 0; } }
 
 /* the menu: a navy plate over the page, the sections in display type */
 .menu { position: fixed; inset: 0; z-index: 45; display: flex; flex-direction: column; justify-content: space-between; gap: 40px; box-sizing: border-box;
@@ -291,7 +272,7 @@ html.menu-open { overflow: hidden; }
 .stage-cap strong { font-weight: 600; }
 .stage-hero .stage-svg { min-height: 220px; }
 .stage-truck { position: absolute; left: 0; top: 0; width: 80px; height: 67px; opacity: 0; visibility: hidden; pointer-events: none; will-change: transform;
-               background: url(/assets/3d/truck.webp) 0 0 / 1600% 100% no-repeat; transition: opacity .3s ease, visibility 0s .3s; }
+               background: url(../assets/3d/truck.webp) 0 0 / 1600% 100% no-repeat; transition: opacity .3s ease, visibility 0s .3s; }
 .stage-truck.is-on { opacity: 1; visibility: visible; transition: opacity .3s ease; }
 html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
 @media (hover: hover) and (pointer: fine) {
@@ -363,7 +344,7 @@ html:not(.js) .stage-ctl, html:not(.js) .stage-truck { display: none; }
 .map-plan .stop { fill: var(--ink); stroke: var(--sheet); stroke-width: 2.5; }
 .depot { fill: var(--ink); stroke: var(--sheet); stroke-width: 3; }
 .map-truck { position: absolute; left: 0; top: 0; width: 64px; height: 53px; opacity: 0; visibility: hidden; pointer-events: none; will-change: transform;
-             background: url(/assets/3d/truck.webp) 0 0 / 1600% 100% no-repeat; transition: opacity .3s ease, visibility 0s .3s; }
+             background: url(../assets/3d/truck.webp) 0 0 / 1600% 100% no-repeat; transition: opacity .3s ease, visibility 0s .3s; }
 .map-truck.is-on { opacity: 1; visibility: visible; transition: opacity .3s ease; }
 .map-key { position: absolute; left: 0; top: 0; display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0; padding: 10px 14px; border-radius: 0 0 var(--r-c) 0;
            background: var(--sheet); font-size: var(--t-small); line-height: 1.4; }

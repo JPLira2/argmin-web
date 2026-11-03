@@ -140,15 +140,17 @@ belongs to the depth system; none is decoration.
 - The navy plates carry gradient descent, the page's only texture: the level sets of an irregular cost surface
   and four runs down to its minimum, computed (`tools/descent.py`), never drawn by hand. It fades out towards
   the left of every plate, so it never sits behind a title. In the hero each run is a line its own shooting
-  star draws, its steps lighting as the star passes: one every 6 s as the day begins, and as the next sets off
-  the last one's track is wiped, so one run shows at a time and the last one stays. The lowest point, a small
-  ring, sits in the clear between the offer and the scene's well, at every size.
+  star draws, its steps lighting as the star passes: one every 6 s, round and round, and as the next sets off
+  the last one's track is wiped, so one run shows at a time. The head goes out at the minimum and its tail
+  slides in after it, every tail the same length on screen. At rest (no script, reduced motion) the last run
+  shows. The lowest point, a small ring, sits in the clear between the offer and the scene's well, at every size.
 - The marks are blocks with a lit top and a shaded side; the hero's scenes play in a well sunk into its plate.
 - Display type is one ink, uppercase, never with an accented word.
 - Motion explains a state change. Where the browser ties animation to the scroll, the hero sinks back as you
   leave it, each plate tips up into place within its first few hundred pixels on screen, and the tools' sheets
-  settle flat as you reach them; never under reduced motion. The stars fly once, pause with the day's pause
-  button and while the hero is off screen.
+  settle flat as you reach them; never under reduced motion. The hero's one button (Pausar, Seguir) holds the
+  day and the stars together, and once the day is over it holds the stars; they also stop while the hero is
+  off screen.
 
 ## Colors
 

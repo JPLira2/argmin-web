@@ -13,8 +13,8 @@ const lines = arr => arr.map(l => `<span class="ln"><span>${esc(l)}</span></span
 // a found photograph, in its greyscale web copies (tools/photos.py); sizes says how wide it is shown
 function photo(x, name, alt, cls, sizes, eager = false) {
   const p = x.photos[name];
-  const set = p.widths.map(w => `/assets/photos/${name}-${w}.webp ${w}w`).join(', ');
-  return `<img class="${cls}" src="/assets/photos/${name}-${p.widths[p.widths.length - 1]}.webp" srcset="${set}" sizes="${sizes}" width="${p.w}" height="${p.h}" alt="${esc(alt)}" loading="${eager ? 'eager' : 'lazy'}" decoding="async">`;
+  const set = p.widths.map(w => `${x.up}assets/photos/${name}-${w}.webp ${w}w`).join(', ');
+  return `<img class="${cls}" src="${x.up}assets/photos/${name}-${p.widths[p.widths.length - 1]}.webp" srcset="${set}" sizes="${sizes}" width="${p.w}" height="${p.h}" alt="${esc(alt)}" loading="${eager ? 'eager' : 'lazy'}" decoding="async">`;
 }
 
 // a stage at rest: the scene's furniture and its 18 marks, at the moment given, in a viewBox the page
@@ -27,6 +27,10 @@ function stage(scene, { W, H, mx = 0, ctx = {}, labels = {}, phase = 'after', ar
 }
 
 export default function page(c, x) {
+  // links inside the site are relative, so the same files work at a domain's root (argmin.cl) and under a
+  // folder (GitHub Pages, /argmin-web/): `up` climbs from this page's folder to the site's
+  x = { ...x, up: '../'.repeat(c.path.split('/').filter(Boolean).length) };
+  const other = x.up + c.other.path.slice(1);
   const es = c.lang.startsWith('es');
   const cfg = x.config;
   const n0 = new Intl.NumberFormat(c.locale, { maximumFractionDigits: 0 });
@@ -124,16 +128,16 @@ export default function page(c, x) {
 <meta property="og:image:alt" content="${esc(c.meta.ogAlt)}">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#1b2a47">
-<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/favicon.ico" sizes="32x32">
-<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
-<link rel="preload" href="/assets/fonts/sofia-sans-extra-condensed-latin.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/css/site.css">
+<link rel="icon" href="${x.up}assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="${x.up}favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="${x.up}assets/apple-touch-icon.png">
+<link rel="preload" href="${x.up}assets/fonts/sofia-sans-extra-condensed-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="${x.up}css/site.css">
 <script>${x.inlineScript}</script>
-<script src="/js/site.js" defer></script>
-<script type="module" src="/js/scenes.js"></script>
-<script type="module" src="/js/calc.js"></script>
-<script type="module" src="/js/routes.js"></script>
+<script src="${x.up}js/site.js" defer></script>
+<script type="module" src="${x.up}js/scenes.js"></script>
+<script type="module" src="${x.up}js/calc.js"></script>
+<script type="module" src="${x.up}js/routes.js"></script>
 <script type="application/ld+json">${JSON.stringify({
     '@context': 'https://schema.org', '@type': 'ProfessionalService', name: 'argmin', url: `${cfg.site}/`,
     email: cfg.email, description: c.meta.description, areaServed: 'CL',
@@ -147,7 +151,7 @@ export default function page(c, x) {
 <header class="top">
   <a class="wm" href="#top" aria-label="${esc(c.home)}">${x.wordmark}</a>
   <nav class="nav" aria-label="${esc(c.navLabel)}">${c.nav.map(([h, t]) => `<a href="${h}">${esc(t)}</a>`).join('')}</nav>
-  <a class="lang" href="${c.other.path}" hreflang="${c.other.lang}" lang="${c.other.lang}">${esc(c.other.label)}</a>
+  <a class="lang" href="${other}" hreflang="${c.other.lang}" lang="${c.other.lang}">${esc(c.other.label)}</a>
   <a class="btn top-cta" href="${esc(booking)}"${ext(booking)}>${esc(c.action)}</a>
   <button class="burger" type="button" aria-expanded="false" aria-controls="menu" aria-label="${esc(c.menu.open)}"><i></i><i></i><i></i></button>
 </header>
@@ -155,7 +159,7 @@ export default function page(c, x) {
   <ul class="menu-list">${c.menuNav.map(([h, t]) => `<li><a href="${h}">${esc(t)}</a></li>`).join('')}</ul>
   <div class="menu-foot">
     <a class="btn" href="${esc(booking)}"${ext(booking)}>${esc(c.action)}</a>
-    <a href="${c.other.path}" hreflang="${c.other.lang}" lang="${c.other.lang}">${esc(c.other.label)}</a>
+    <a href="${other}" hreflang="${c.other.lang}" lang="${c.other.lang}">${esc(c.other.label)}</a>
     <a href="${mail}" translate="no">${esc(cfg.email)}</a>
   </div>
 </nav>
@@ -171,7 +175,7 @@ export default function page(c, x) {
     </div>
     <div class="stage stage-hero" data-stage="hero" ${stageData('rutas', x.stages.hero)} data-caps="${esc(JSON.stringify(c.stage.scenes))}">
       <div class="stage-bar">
-        <div class="stage-ctl" role="group" aria-label="${esc(c.stage.group)}">${c.stage.tabs.map(([k, t], i) => `<button class="stage-tab" type="button" data-play="${k}" aria-pressed="${i === 0}">${esc(t)}</button>`).join('')}<button class="stage-pause" type="button" data-pause aria-pressed="false" data-on="${esc(c.stage.pause.on)}" data-off="${esc(c.stage.pause.off)}" data-again="${esc(c.stage.pause.again)}">${esc(c.stage.pause.again)}</button></div>
+        <div class="stage-ctl" role="group" aria-label="${esc(c.stage.group)}">${c.stage.tabs.map(([k, t], i) => `<button class="stage-tab" type="button" data-play="${k}" aria-pressed="${i === 0}">${esc(t)}</button>`).join('')}<button class="stage-pause" type="button" data-pause aria-pressed="false" data-on="${esc(c.stage.pause.on)}" data-off="${esc(c.stage.pause.off)}">${esc(c.stage.pause.on)}</button></div>
         <p class="stage-cap"><strong>${esc(c.stage.scenes.rutas[0])}</strong> <span>${esc(c.stage.scenes.rutas[1])}</span></p>
         <p class="stage-key"><span class="key-w">${esc(c.stage.key[0])}</span> <span class="key-a">${esc(c.stage.key[1])}</span></p>
       </div>
@@ -230,7 +234,7 @@ ${c.models.list.map(([scene, t, d]) => `      <li class="model">
       </div>
       <figure class="map" data-routes data-seed="${ex.seed}" data-locale="${c.locale}" data-cpk="${ex.cpk}" data-saving="${esc(c.routes.saving)}">
         <div class="map-frame">
-          <img class="map-base" src="/assets/santiago.svg" alt="" width="1000" height="750">
+          <img class="map-base" src="${x.up}assets/santiago.svg" alt="" width="1000" height="750">
           <svg class="map-plan" viewBox="0 0 1000 750" role="img" aria-labelledby="map-title"><title id="map-title">${esc(fill(c.routes.mapTitle, fleet))}</title>${ex.svg}</svg>
           <div class="map-truck" aria-hidden="true"></div>
           <p class="map-key"><span class="key"><i class="k-plan"></i>${esc(c.routes.legend[0])}</span><span class="key"><i class="k-model"></i>${esc(c.routes.legend[1])}</span><span class="key"><i class="k-depot"></i>${esc(c.routes.legend[2])}</span></p>
@@ -336,7 +340,7 @@ ${c.faq.items.map(([q, a], i) => `      <div class="q${i === 0 ? ' is-open' : ''
       <li class="row-wrap">
         <button class="row" type="button" id="form-btn" aria-expanded="true" aria-controls="form-panel"><span>${esc(c.contact.rows.form)}</span></button>
         <div class="form-panel" id="form-panel"><div class="form-panel-in">
-          <form class="form" action="/api/contacto" method="post" data-form data-lang="${es ? 'es' : 'en'}"
+          <form class="form" action="${x.up}api/contacto" method="post" data-form data-lang="${es ? 'es' : 'en'}"
                 data-sending="${esc(c.contact.form.sending)}" data-ok="${esc(c.contact.form.ok)}"
                 data-error="${esc(fill(c.contact.form.error, { email: cfg.email }))}" data-off="${esc(fill(c.contact.form.off, { email: cfg.email }))}"
                 data-missing="${esc(c.contact.form.missing)}">
@@ -364,7 +368,7 @@ ${c.faq.items.map(([q, a], i) => `      <div class="q${i === 0 ? ' is-open' : ''
   </div>
   <p class="end-mail" translate="no"><a href="${mail}">${esc(cfg.email.split('@')[0])}@<wbr>${esc(cfg.email.split('@')[1])}</a></p>
   <div class="end-meta">
-    <p class="end-links"><a href="${c.other.path}" hreflang="${c.other.lang}" lang="${c.other.lang}">${esc(c.other.label)}</a>${cfg.linkedin ? ` <a href="${esc(cfg.linkedin)}"${ext(cfg.linkedin)}>${esc(c.footer.linkedin)}</a>` : ''}</p>
+    <p class="end-links"><a href="${other}" hreflang="${c.other.lang}" lang="${c.other.lang}">${esc(c.other.label)}</a>${cfg.linkedin ? ` <a href="${esc(cfg.linkedin)}"${ext(cfg.linkedin)}>${esc(c.footer.linkedin)}</a>` : ''}</p>
     <p class="credits">${c.footer.photos}: ${credits}, ${c.footer.via}. ${esc(c.footer.licence)} ${esc(c.footer.map)}</p>
     <p>${cfg.company.name && cfg.company.rut ? `${esc(fill(c.footer.legal, cfg.company))}<br>` : ''}${esc(c.footer.place)}</p>
   </div>

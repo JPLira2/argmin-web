@@ -159,8 +159,8 @@
       .then(function () { send.disabled = false; });
   });
 
-  /* ---------- today's UF ---------- */
-  fetch('/api/uf', { headers: { Accept: 'application/json' } })
+  /* ---------- today's UF (from the site's root, found from this script's own address) ---------- */
+  fetch(new URL('../api/uf', document.currentScript.src), { headers: { Accept: 'application/json' } })
     .then(function (r) { return r.ok ? r.json() : null; })
     .then(function (j) {
       if (!j || !(j.valor > 0) || !/^\d{4}-\d{2}-\d{2}$/.test(j.fecha)) return;

@@ -34,7 +34,7 @@ FEATURES = [
     (-1.15, 1018, 334, 190, 70, -8),          # the trough the descents come down, just short of the minimum
 ]
 CENTRE = (1075.0, 323.0)                      # the funnel's centre; the true minimum is found below
-STARTS = [(1268, 22), (36, 330), (560, 18), (1268, 470)]   # in the order the page flies them; the last one stays
+STARTS = [(1268, 22), (980, 0), (1268, 250), (1268, 470)]   # in the order the page flies them; the last stays at rest
 LR = 5000.0                                    # across the trough, 1.4 times the step that lands on its floor: a few zig-zags, then it settles
 
 
